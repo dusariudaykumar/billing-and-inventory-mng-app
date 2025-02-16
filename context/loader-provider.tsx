@@ -1,6 +1,7 @@
-import { useVerifyUserQuery } from '@/store/services/auth';
 import { useRouter } from 'next/router';
 import React, { createContext, useContext, useEffect, useState } from 'react';
+
+import { useVerifyUserQuery } from '@/store/services/auth';
 
 type LoadingContextType = {
   isLoading: boolean;
@@ -31,7 +32,7 @@ export function LoaderProvider({ children }: { children: React.ReactNode }) {
     if (isError) {
       router.push('/login');
     }
-  }, [skipVerification, refetch, router]);
+  }, [skipVerification, refetch, router, isError]);
   return (
     <LoaderContext.Provider value={{ isLoading, showLoader, hideLoader }}>
       {children}

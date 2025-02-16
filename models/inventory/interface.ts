@@ -2,8 +2,10 @@ import { Document, Model } from 'mongoose';
 
 export interface Inventory {
   name: string;
-  cost: number;
+  sellingPrice: number;
   quantity: number;
+  units: string;
+  purchasePrice: number;
 }
 
 export interface InventoryDoc extends Inventory, Document {}

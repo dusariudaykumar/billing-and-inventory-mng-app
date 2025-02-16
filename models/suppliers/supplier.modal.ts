@@ -7,10 +7,12 @@ const supplierSchema = new mongoose.Schema<ISupplierDoc, ISupplierModal>(
     name: {
       type: String,
       required: true,
+      trim: true,
     },
     companyName: {
       type: String,
       required: true,
+      trim: true,
     },
     contactDetails: {
       type: Object,

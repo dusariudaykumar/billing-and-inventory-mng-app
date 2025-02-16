@@ -1,6 +1,7 @@
-import CustomerTable from '@/components/customer/customer-table';
 import Layout from 'components/layout';
 import Seo from 'components/seo';
+
+import CustomerTable from '@/components/customer/customer-table';
 
 export default function Page() {
   return (

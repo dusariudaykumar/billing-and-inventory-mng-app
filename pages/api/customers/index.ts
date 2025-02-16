@@ -1,5 +1,5 @@
 import logger from 'lib/logger';
-import { withAuth } from '@/middleware/with-auth-api-middleware';
+import _ from 'lodash';
 import {
   createCustomer,
   getAllCustomers,
@@ -8,13 +8,34 @@ import {
 import { ICustomer } from 'models/customers/interface';
 import { NextApiRequest, NextApiResponse } from 'next';
 
+import { textToMongoRegExpStatements } from '@/lib/mongo-funs';
+
+import { withAuth } from '@/middleware/with-auth-api-middleware';
+
 async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { method, body } = req;
+  const { method, body, query } = req;
 
   switch (method) {
     case 'GET':
       try {
-        const customers = await getAllCustomers();
+        let baseQuery: object = {};
+        const { page = 1, limit = 10, search } = query;
+
+        const searchProps = ['name', 'companyName'];
+
+        if (typeof search === 'string') {
+          const searchQuery = _.chain(searchProps)
+            .map((props) => textToMongoRegExpStatements(props, search))
+            .flatten()
+            .filter((it) => !!it)
+            .value();
+          baseQuery = { $or: searchQuery };
+        }
+        const customers = await getAllCustomers(
+          baseQuery,
+          Number(limit),
+          Number(page)
+        );
         return res.status(200).json({ success: true, data: customers });
       } catch (e) {
         logger(e);
@@ -49,7 +70,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         }
         return res
           .status(400)
-          .send({ success: false, data: 'Customer already exists' });
+          .send({ success: false, message: 'Customer already exists' });
       } catch (error) {
         return res.status(500).json({
           success: false,

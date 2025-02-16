@@ -1,20 +1,29 @@
+import { createApi } from '@reduxjs/toolkit/query/react';
+
+import { appendQueryParams } from '@/lib/helper';
+
+import { baseQuery } from '@/store/base-query';
+
 import {
   CreateCustomerPayload,
   CreateCutomerAPIResponse,
   GetAllCustomersAPIResponse,
 } from '@/interfaces/response.interface';
-import { baseQuery } from '@/store/base-query';
-import { createApi } from '@reduxjs/toolkit/query/react';
 
 export const customerApi = createApi({
   reducerPath: 'customer',
   baseQuery: baseQuery,
+  tagTypes: ['customers'],
   endpoints: (builder) => ({
-    getAllCustomer: builder.query<GetAllCustomersAPIResponse, void>({
-      query: () => ({
-        url: `/customers`,
+    getAllCustomers: builder.query<
+      GetAllCustomersAPIResponse,
+      { page?: number; limit?: number; search?: string }
+    >({
+      query: (params) => ({
+        url: appendQueryParams(`/customers`, params),
         method: 'GET',
       }),
+      providesTags: ['customers'],
     }),
     createNewCustomer: builder.mutation<
       CreateCutomerAPIResponse,
@@ -25,9 +34,36 @@ export const customerApi = createApi({
         method: 'POST',
         body: payload,
       }),
+      async onQueryStarted(payload, { dispatch, queryFulfilled, getState }) {
+        const { data: updatedCustomer } = await queryFulfilled;
+
+        if (!updatedCustomer.data) return;
+
+        customerApi.util
+          .selectInvalidatedBy(getState(), [{ type: 'customers' }])
+          .forEach(({ originalArgs, endpointName }) => {
+            if (endpointName !== 'getAllCustomers') return;
+            // Safely update the `getAllCustomer` cache by adding the new customer at the top
+            dispatch(
+              customerApi.util.updateQueryData(
+                endpointName,
+                originalArgs,
+                (draft) => {
+                  if (draft.data) {
+                    if (draft.data?.customers) {
+                      draft.data.customers.unshift(updatedCustomer.data!);
+                    } else {
+                      draft.data.customers = [updatedCustomer.data!];
+                    }
+                  }
+                }
+              )
+            );
+          });
+      },
     }),
   }),
 });
 
-export const { useGetAllCustomerQuery, useCreateNewCustomerMutation } =
+export const { useGetAllCustomersQuery, useCreateNewCustomerMutation } =
   customerApi;

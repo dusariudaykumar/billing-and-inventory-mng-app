@@ -1,29 +1,67 @@
 'use client';
 
-import { columns } from '@/components/customer/columns';
-import { DataTable } from '@/components/table/data-table';
+import { CirclePlus } from 'lucide-react';
+import { useState } from 'react';
+
 import logger from '@/lib/logger';
-import { useGetAllCustomerQuery } from '@/store/services/customer';
-import React, { useEffect } from 'react';
+
+import { columns } from '@/components/customer/columns';
+import { CustomerModel } from '@/components/customer/customer-model';
+import { DataTable } from '@/components/table/data-table';
+import { Button } from '@/components/ui/button';
+
+import {
+  useCreateNewCustomerMutation,
+  useGetAllCustomersQuery,
+} from '@/store/services/customer';
+
+import { useLoading } from '@/context/loader-provider';
+import { CreateCustomerPayload } from '@/interfaces/response.interface';
 
 const CustomerTable = () => {
-  const { data } = useGetAllCustomerQuery();
+  const { hideLoader, showLoader } = useLoading();
+  const { data } = useGetAllCustomersQuery({});
+  const [createCustomer] = useCreateNewCustomerMutation();
   logger(data);
+
+  const [openCustomerModel, setOpenCustomerModel] = useState<boolean>(false);
+
+  const createNewCustomer = async (newCustomer: CreateCustomerPayload) => {
+    try {
+      showLoader();
+      const response = await createCustomer(newCustomer).unwrap();
+      logger(response);
+    } catch (error) {
+      logger(error);
+    } finally {
+      hideLoader();
+    }
+  };
   return (
-    <div className='flex h-full flex-1 flex-col space-y-8 p-8 md:flex'>
-      <div className='flex items-center justify-between space-y-2'>
-        <div>
-          <h2 className='text-2xl font-bold tracking-tight'>Welcome back!</h2>
-          <p className='text-muted-foreground'>
-            Here&apos;s a list of your tasks for this month!
-          </p>
+    <div className='flex h-full w-full flex-1 flex-col space-y-8 p-8'>
+      <div className='flex items-center justify-between'>
+        <div className='flex w-full items-center justify-between'>
+          <h2 className='text-2xl font-bold tracking-tight'>Customers</h2>
+          <Button onClick={() => setOpenCustomerModel(true)}>
+            <CirclePlus /> Add Customer
+          </Button>
         </div>
       </div>
-      <DataTable
-        data={data?.data || []}
-        columns={columns}
-        containerClassname='h-fit max-h-80 overflow-y-auto relative'
-      />
+
+      {/* Table Container */}
+      <div className='max-h-full w-full overflow-auto'>
+        <DataTable data={data?.data?.customers || []} columns={columns} />
+      </div>
+      {openCustomerModel && (
+        <CustomerModel
+          OnClose={() => setOpenCustomerModel(false)}
+          isOpen={openCustomerModel}
+          onSubmit={async (customer) => {
+            await createNewCustomer(customer);
+            setOpenCustomerModel(false);
+          }}
+        />
+      )}
     </div>
   );
 };

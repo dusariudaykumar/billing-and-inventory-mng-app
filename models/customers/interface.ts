@@ -4,6 +4,7 @@ export interface ICustomer {
   name: string;
   companyName: string;
   contactDetails: ContactDetails;
+  customerID: string;
 }
 
 export interface ContactDetails {

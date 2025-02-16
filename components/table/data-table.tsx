@@ -33,22 +33,28 @@ export const DataTable: React.FC<Props> = ({
   const table = useReactTable({
     data,
     columns,
-    // state: {
-    //   rowSelection,
-    // },
     getCoreRowModel: getCoreRowModel(),
+    // state: {
+    //   rowSelection, // Optional: for row selection
+    // },
   });
 
   return (
-    <div className={cn('rounded-md border', containerClassname)}>
-      <div className='relative w-full overflow-auto'>
-        <Table className={cn('w-full caption-bottom text-sm', className)}>
-          <TableHeader>
+    <div className={cn('relative   rounded-md border', containerClassname)}>
+      <div className='relative max-h-[63vh] overflow-auto'>
+        <Table
+          className={cn(className)}
+          // className={cn('w-full caption-bottom text-sm', className)}
+        >
+          <TableHeader className='sticky top-0 bg-white'>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead
+                      key={header.id}
+                      className='sticky top-0 bg-white'
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(

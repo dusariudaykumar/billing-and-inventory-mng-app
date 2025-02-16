@@ -4,13 +4,19 @@ import { ICustomerDoc, ICustomerModel } from './interface';
 
 const customerSchema = new mongoose.Schema<ICustomerDoc, ICustomerModel>(
   {
+    customerID: {
+      type: String,
+      required: true,
+    },
     name: {
       type: String,
       required: true,
+      trim: true,
     },
     companyName: {
       type: String,
       required: true,
+      trim: true,
     },
     contactDetails: {
       type: Object,

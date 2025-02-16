@@ -1,18 +1,18 @@
 'use client';
 
-import * as React from 'react';
 import {
   Box,
   IndianRupee,
   LayoutDashboard,
-  ReceiptText,
   ScrollText,
+  Truck,
   Users,
 } from 'lucide-react';
+import * as React from 'react';
 
-// import { NavProjects } from '@/components/nav-projects';
-// import { NavSecondary } from '@/components/nav-secondary';
-
+import { NavSecondary } from '@/components/sidebar/nav-secondary';
+import { NavUser } from '@/components/sidebar/nav-user';
+import { Avatar, AvatarImage } from '@/components/ui/avatar';
 import {
   Sidebar,
   SidebarContent,
@@ -22,10 +22,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { NavMain } from '@/components/sidebar/nav-main';
-import { NavUser } from '@/components/sidebar/nav-user';
-import { Avatar, AvatarImage } from '@/components/ui/avatar';
-import { NavSecondary } from '@/components/sidebar/nav-secondary';
+
 import { useAppSelector } from '@/store/hooks';
 import { getUserData } from '@/store/slice/authSlice';
 
@@ -42,60 +39,29 @@ const data = {
       icon: LayoutDashboard,
     },
   ],
-  navMain: [
-    {
-      title: 'Invoice Management',
-      url: '#',
-      icon: ReceiptText,
-      isActive: true,
-      items: [
-        {
-          title: 'Invoice',
-          url: '#',
-        },
-        {
-          title: 'Add Invoice',
-          url: '#',
-        },
-      ],
-    },
-    {
-      title: 'Inventory Management',
-      url: '#',
-      icon: Box,
-      items: [
-        {
-          title: 'View Inventory',
-          url: '#',
-        },
-        {
-          title: 'Add Item',
-          url: '#',
-        },
-      ],
-    },
-    {
-      title: 'Customer Management',
-      url: '#',
-      icon: Users,
-      items: [
-        {
-          title: 'Customers',
-          url: '#',
-        },
-        {
-          title: 'Add Customer',
-          url: '#',
-        },
-      ],
-    },
-  ],
-  projects: [
+
+  secondaryItems: [
     {
       name: 'Sales',
-      url: '#',
+      url: '/sales',
       icon: IndianRupee,
     },
+    {
+      name: 'Inventory',
+      url: '/inventory',
+      icon: Box,
+    },
+    {
+      name: 'Customers',
+      url: '/customers',
+      icon: Users,
+    },
+    {
+      name: 'Suppliers',
+      url: '/suppliers',
+      icon: Truck,
+    },
+
     {
       name: 'Purchases',
       url: '#',
@@ -129,9 +95,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavSecondary items={data.dashboard} />
-        <NavMain items={data.navMain} />
+        {/* <NavMain items={data.navMain} /> */}
         {/* <NavProjects projects={data.projects} /> */}
-        <NavSecondary items={data.projects} />
+        <NavSecondary items={data.secondaryItems} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />

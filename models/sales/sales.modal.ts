@@ -1,15 +1,24 @@
 import mongoose from 'mongoose';
 
-import { ISalesDoc, ISalesModel } from './interface';
+import { InvoiceStatus, ISalesDoc, ISalesModel } from './interface';
 
 const salesSchema = new mongoose.Schema<ISalesDoc, ISalesModel>(
   {
+    invoiceNumber: {
+      type: String,
+      required: true,
+    },
     customerId: {
       type: mongoose.Schema.Types.ObjectId,
+      ref: 'Customers',
       required: true,
     },
     vehicleNumber: {
       type: String,
+      required: true,
+    },
+    invoiceDate: {
+      type: Date,
       required: true,
     },
     items: {
@@ -32,6 +41,19 @@ const salesSchema = new mongoose.Schema<ISalesDoc, ISalesModel>(
       type: Number,
       required: false,
       default: 0,
+    },
+    status: {
+      type: String,
+      required: true,
+      default: InvoiceStatus.UNPAID,
+    },
+    paymentMethod: {
+      type: String,
+      required: false,
+    },
+    notes: {
+      type: String,
+      required: false,
     },
   },
   {

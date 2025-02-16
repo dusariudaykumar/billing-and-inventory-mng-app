@@ -1,13 +1,18 @@
 'use client';
 
+import { ColumnDef } from '@tanstack/react-table';
+
 import { DataTableColumnHeader } from '@/components/table/data-table-column-header';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ColumnDef } from '@tanstack/react-table';
+
+import { ContactDetails } from '@/interfaces/response.interface';
 
 interface CustomerColumn {
   id: string;
+  customerID: string;
   name: string;
   companyName: string;
+  contactDetails: ContactDetails;
 }
 
 export const columns: ColumnDef<CustomerColumn>[] = [
@@ -36,11 +41,11 @@ export const columns: ColumnDef<CustomerColumn>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: 'id',
+    accessorKey: 'customerID',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='ID' />
+      <DataTableColumnHeader column={column} title='# CustomerID' />
     ),
-    cell: ({ row }) => <div>{row.getValue('id')}</div>,
+    cell: ({ row }) => <div>#{row.getValue('customerID')}</div>,
     enableSorting: true,
     enableHiding: true,
   },
@@ -63,53 +68,26 @@ export const columns: ColumnDef<CustomerColumn>[] = [
     enableHiding: true,
   },
   {
-    accessorKey: 'contactDetails',
+    accessorKey: 'phone',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Company Name' />
+      <DataTableColumnHeader column={column} title='Phone No.' />
     ),
-    cell: ({ row }) => (
-      <div>{(row.getValue('contactDetails') as any)?.phone}</div>
-    ),
+    cell: ({ row }) => {
+      const contactDetails = row.original?.contactDetails;
+      return <div>{contactDetails?.phone}</div>;
+    },
     enableSorting: true,
     enableHiding: true,
   },
   {
-    accessorKey: 'companyName',
+    accessorKey: 'email',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Company Name' />
+      <DataTableColumnHeader column={column} title='Email' />
     ),
-    cell: ({ row }) => <div>{row.getValue('companyName')}</div>,
-    enableSorting: true,
-    enableHiding: true,
-  },
-  {
-    accessorKey: 'contactDetails',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Company Name' />
-    ),
-    cell: ({ row }) => (
-      <div>{(row.getValue('contactDetails') as any)?.phone}</div>
-    ),
-    enableSorting: true,
-    enableHiding: true,
-  },
-  {
-    accessorKey: 'companyName',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Company Name' />
-    ),
-    cell: ({ row }) => <div>{row.getValue('companyName')}</div>,
-    enableSorting: true,
-    enableHiding: true,
-  },
-  {
-    accessorKey: 'contactDetails',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Company Name' />
-    ),
-    cell: ({ row }) => (
-      <div>{(row.getValue('contactDetails') as any)?.phone}</div>
-    ),
+    cell: ({ row }) => {
+      const contactDetails = row.original?.contactDetails;
+      return <div>{contactDetails?.email || 'N/A'}</div>;
+    },
     enableSorting: true,
     enableHiding: true,
   },

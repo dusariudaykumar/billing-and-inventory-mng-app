@@ -1,11 +1,12 @@
 import type { AppProps } from 'next/app';
-
-import '../styles/globals.css';
 import { Toaster } from 'sonner';
 
-import StoreProvider from '@/context/store-provider';
-import { LoaderProvider, useLoading } from '@/context/loader-provider';
+import '../styles/globals.css';
+
 import { Loader } from '@/components/loader/loader';
+
+import { LoaderProvider, useLoading } from '@/context/loader-provider';
+import StoreProvider from '@/context/store-provider';
 
 function AppLoader() {
   const { isLoading } = useLoading();

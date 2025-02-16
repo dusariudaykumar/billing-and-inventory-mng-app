@@ -7,13 +7,23 @@ const inventorySchema = new mongoose.Schema<InventoryDoc, InventoryModel>(
     name: {
       type: String,
       required: true,
+      trim: true,
     },
-    cost: {
+    sellingPrice: {
+      type: Number,
+      required: true,
+    },
+    purchasePrice: {
       type: Number,
       required: true,
     },
     quantity: {
       type: Number,
+      required: true,
+      default: 0,
+    },
+    units: {
+      type: String,
       required: true,
     },
   },
