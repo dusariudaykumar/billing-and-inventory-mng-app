@@ -31,7 +31,7 @@ module.exports = {
     //#region  //*=========== Unused Import ===========
     '@typescript-eslint/no-unused-vars': 'off',
     'unused-imports/no-unused-imports': 'warn',
-    'unused-imports/no-unused-vars': [
+    'unused-imports': [
       'warn',
       {
         vars: 'all',

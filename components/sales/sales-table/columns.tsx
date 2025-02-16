@@ -96,8 +96,7 @@ export const columns: ColumnDef<Sale>[] = [
   {
     accessorKey: 'action',
     header: () => <div></div>,
-    cell: ({ row }) => {
-      const {} = row.original;
+    cell: () => {
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

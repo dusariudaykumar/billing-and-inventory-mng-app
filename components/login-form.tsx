@@ -1,14 +1,13 @@
-import { FormEvent, useState } from 'react';
-
-import { cn } from '@/lib/utils';
-
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useLoading } from '@/context/loader-provider';
+import logger from '@/lib/logger';
+import { cn } from '@/lib/utils';
 import { useLoginMutation } from '@/store/services/auth';
 import { useRouter } from 'next/router';
+import { FormEvent, useState } from 'react';
 
 export function LoginForm({
   className,
@@ -27,6 +26,7 @@ export function LoginForm({
       await login(formData).unwrap();
       router.push('/');
     } catch (error) {
+      logger(error);
     } finally {
       hideLoader();
     }
