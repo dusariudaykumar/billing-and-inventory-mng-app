@@ -1,22 +1,12 @@
 'use client';
 
-import {
-  BadgeCheck,
-  Bell,
-  ChevronsUpDown,
-  CreditCard,
-  LogOut,
-  Sparkles,
-} from 'lucide-react';
+import { ChevronsUpDown, LogOut } from 'lucide-react';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
@@ -25,7 +15,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { useAppSelector } from '@/store/hooks';
+import logger from '@/lib/logger';
 import { useLazyLogoutQuery } from '@/store/services/auth';
 
 export function NavUser({
@@ -43,7 +33,9 @@ export function NavUser({
   const logoutHandler = async () => {
     try {
       await logout();
-    } catch (error) {}
+    } catch (error) {
+      logger(error);
+    }
   };
 
   return (
