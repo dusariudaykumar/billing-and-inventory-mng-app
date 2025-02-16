@@ -11,16 +11,21 @@ export const authApi = createApi({
       { email: string; password: string }
     >({
       query: (payload) => ({
-        url: `/auth/login`,
+        url: `/auth`,
         method: 'POST',
         body: payload,
       }),
     }),
     verifyUser: builder.query<UserAPIResponse, void>({
-      query: () => `/auth/verify`,
+      query: () => `/auth`,
     }),
     logout: builder.query<void, void>({
-      query: () => `/auth/logout`,
+      query: () => {
+        return {
+          url: `/auth`,
+          method: 'DELETE',
+        };
+      },
     }),
   }),
 });
