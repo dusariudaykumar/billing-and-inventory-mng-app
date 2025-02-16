@@ -10,14 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useDebounce } from '@/hooks/use-debounce';
-import { Minus, Pencil, Plus, Trash2 } from 'lucide-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-
-import { useGetAllCustomersQuery } from '@/store/services/customer';
-import { useGetAllItemsFromInventoryQuery } from '@/store/services/inventory';
-
 import { Textarea } from '@/components/ui/textarea';
+import { useDebounce } from '@/hooks/use-debounce';
 import {
   BasicQueryParams,
   CreateInvoicePayload,
@@ -28,7 +22,11 @@ import {
   InvoiceStatus,
   PaymentMethods,
 } from '@/interfaces/response.interface';
+import { useGetAllCustomersQuery } from '@/store/services/customer';
+import { useGetAllItemsFromInventoryQuery } from '@/store/services/inventory';
 import { useCreateInvoiceMutation } from '@/store/services/sales';
+import { Minus, Pencil, Plus, Trash2 } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 // Form error types remain unchanged.
 interface FormErrors {
@@ -86,11 +84,13 @@ const CreateInvoice = () => {
     page: 1,
   });
 
-  const [inventoryItemsParams, setInventoryItemsParams] =
-    useState<BasicQueryParams>({
-      limit: 10,
-      page: 1,
-    });
+  const [
+    inventoryItemsParams,
+    // setInventoryItemsParams
+  ] = useState<BasicQueryParams>({
+    limit: 10,
+    page: 1,
+  });
 
   const [createInvoice] = useCreateInvoiceMutation();
 
@@ -102,7 +102,7 @@ const CreateInvoice = () => {
   const {
     data: customers,
     error: customersError,
-    isLoading: isLoadingCustomers,
+    // isLoading: isLoadingCustomers,
   } = useGetAllCustomersQuery({
     limit: customerParams.limit,
     page: customerParams.page,
@@ -112,7 +112,7 @@ const CreateInvoice = () => {
   const {
     data: inventory,
     error: inventoryError,
-    isLoading: isLoadingInventory,
+    // isLoading: isLoadingInventory,
   } = useGetAllItemsFromInventoryQuery({
     limit: inventoryItemsParams.limit,
     page: inventoryItemsParams.page,

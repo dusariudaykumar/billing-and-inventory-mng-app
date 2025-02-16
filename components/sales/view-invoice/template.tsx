@@ -36,12 +36,6 @@ const InvoiceTemplate: React.FC<InvoiceProps> = ({
     city: 'Livonia',
     postalCode: 'MI 48150',
   },
-  shipTo = {
-    address: '45 Roker Terrace',
-    city: 'Latheronwheel',
-    postalCode: 'KW5 8NW',
-    country: 'United Kingdom',
-  },
   issueDate = '03/10/2018',
   dueDate = '05/10/2018',
   items = [

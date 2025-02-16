@@ -1,15 +1,4 @@
 'use client';
-import { zodResolver } from '@hookform/resolvers/zod';
-import React from 'react';
-import { useForm } from 'react-hook-form';
-
-import {
-  InventoryFormData,
-  inventorySchema,
-  SupplierFormData,
-  supplierSchema,
-} from '@/lib/schemas';
-
 import { Modal } from '@/components/modal';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,14 +10,14 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-
 import {
   AddNewItemToInventoryPayload,
-  CreateSupplierPayload,
   Inventory,
-  Supplier,
 } from '@/interfaces/response.interface';
-import { IndianRupee } from 'lucide-react';
+import { InventoryFormData, inventorySchema } from '@/lib/schemas';
+import { zodResolver } from '@hookform/resolvers/zod';
+import React from 'react';
+import { useForm } from 'react-hook-form';
 
 interface Props {
   isOpen: boolean;

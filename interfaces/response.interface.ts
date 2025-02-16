@@ -97,7 +97,7 @@ export type GetAllItemsFromInventoryAPIResponse = IResponse<
 
 export type AddNewItemToInventoryPayload = Omit<
   Inventory,
-  '_id' | 'createdAt' | 'updatedAt'
+  '_id' | 'createdAt' | 'updatedAt' | '__v'
 >;
 export type AddNewItemToInventoryAPIResponse = IResponse<Inventory>;
 

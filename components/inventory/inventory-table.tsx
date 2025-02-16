@@ -1,22 +1,18 @@
 'use client';
 
-import { CirclePlus } from 'lucide-react';
-import { useState } from 'react';
-
-import logger from '@/lib/logger';
-
 import { columns } from '@/components/inventory/columns';
 import { ItemModal } from '@/components/inventory/inventory-modal';
 import { DataTable } from '@/components/table/data-table';
 import { Button } from '@/components/ui/button';
-
+import { useLoading } from '@/context/loader-provider';
+import { AddNewItemToInventoryPayload } from '@/interfaces/response.interface';
+import logger from '@/lib/logger';
 import {
   useAddNewItemToInventoryMutation,
   useGetAllItemsFromInventoryQuery,
 } from '@/store/services/inventory';
-
-import { useLoading } from '@/context/loader-provider';
-import { AddNewItemToInventoryPayload } from '@/interfaces/response.interface';
+import { CirclePlus } from 'lucide-react';
+import { useState } from 'react';
 
 const InventoryTable = () => {
   const { hideLoader, showLoader } = useLoading();
@@ -35,58 +31,6 @@ const InventoryTable = () => {
     } finally {
       hideLoader();
     }
-  };
-
-  const sampleData = {
-    invoiceNumber: 'BBN2351D458',
-    issueDate: '20/07/2024',
-    client: {
-      name: 'Michael Reyes',
-      social: '@Michael_Reyes|+1 123 456 789',
-      billingAddress: {
-        street: '854 Ave Folsom',
-        city: 'San Francisco',
-        state: 'CA',
-        zip: '36925',
-        phone: '(123) 456-7890',
-      },
-      shippingAddress: {
-        street: '795 Folsom Ave',
-        city: 'San Francisco',
-        state: 'CA',
-        zip: '94107',
-        phone: '(123) 456-7890',
-      },
-    },
-    projects: [
-      {
-        description: 'Project Design',
-        details:
-          'It is a long established fact that a reader will be distracted.',
-        hours: 60,
-        rate: 50,
-        subtotal: 3000.0,
-      },
-      {
-        description: 'Development',
-        details:
-          'It is a long established fact that a reader will be distracted.',
-        hours: 100,
-        rate: 50,
-        subtotal: 5000.0,
-      },
-      {
-        description: 'Testing & Bug Fixing',
-        details:
-          'It is a long established fact that a reader will be distracted.',
-        hours: 10,
-        rate: 20,
-        subtotal: 200.0,
-      },
-    ],
-    subTotal: 82000.0,
-    taxRate: 0.0,
-    total: 82000.0,
   };
 
   return (
