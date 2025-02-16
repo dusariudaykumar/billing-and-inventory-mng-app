@@ -1,22 +1,18 @@
 'use client';
 
-import { CirclePlus } from 'lucide-react';
-import { useState } from 'react';
-
-import logger from '@/lib/logger';
-
 import { CustomerModel } from '@/components/customer/customer-model';
 import { columns } from '@/components/supplier/columns';
 import { DataTable } from '@/components/table/data-table';
 import { Button } from '@/components/ui/button';
-
+import { useLoading } from '@/context/loader-provider';
+import { CreateSupplierPayload } from '@/interfaces/response.interface';
+import logger from '@/lib/logger';
 import {
   useCreateNewSupplierMutation,
   useGetAllSuppliersQuery,
 } from '@/store/services/supplier';
-
-import { useLoading } from '@/context/loader-provider';
-import { CreateSupplierPayload } from '@/interfaces/response.interface';
+import { CirclePlus } from 'lucide-react';
+import { useState } from 'react';
 
 const SupplierTable = () => {
   const { hideLoader, showLoader } = useLoading();

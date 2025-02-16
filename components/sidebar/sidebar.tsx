@@ -1,15 +1,5 @@
 'use client';
 
-import {
-  Box,
-  IndianRupee,
-  LayoutDashboard,
-  ScrollText,
-  Truck,
-  Users,
-} from 'lucide-react';
-import * as React from 'react';
-
 import { NavSecondary } from '@/components/sidebar/nav-secondary';
 import { NavUser } from '@/components/sidebar/nav-user';
 import { Avatar, AvatarImage } from '@/components/ui/avatar';
@@ -22,6 +12,15 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import {
+  Box,
+  IndianRupee,
+  LayoutDashboard,
+  ScrollText,
+  Truck,
+  Users,
+} from 'lucide-react';
+import * as React from 'react';
 
 import { useAppSelector } from '@/store/hooks';
 import { getUserData } from '@/store/slice/authSlice';

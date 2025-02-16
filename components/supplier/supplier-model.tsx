@@ -1,9 +1,8 @@
 'use client';
+import { SupplierFormData, supplierSchema } from '@/lib/schemas';
 import { zodResolver } from '@hookform/resolvers/zod';
 import React from 'react';
 import { useForm } from 'react-hook-form';
-
-import { SupplierFormData, supplierSchema } from '@/lib/schemas';
 
 import { Modal } from '@/components/modal';
 import { Button } from '@/components/ui/button';

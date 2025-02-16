@@ -1,7 +1,5 @@
 'use client';
 
-import { ChevronsUpDown, LogOut } from 'lucide-react';
-
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -17,6 +15,7 @@ import {
 } from '@/components/ui/sidebar';
 import logger from '@/lib/logger';
 import { useLazyLogoutQuery } from '@/store/services/auth';
+import { ChevronsUpDown, LogOut } from 'lucide-react';
 
 export function NavUser({
   user,

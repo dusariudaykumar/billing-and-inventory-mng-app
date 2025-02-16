@@ -1,8 +1,3 @@
-import { Minus, Pencil, Plus, Trash2 } from 'lucide-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-
-import { useDebounce } from '@/hooks/use-debounce';
-
 import { AutoComplete } from '@/components/auto-complete';
 import { CalendarForm } from '@/components/calendar';
 import { Button } from '@/components/ui/button';
@@ -15,6 +10,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useDebounce } from '@/hooks/use-debounce';
+import { Minus, Pencil, Plus, Trash2 } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useGetAllCustomersQuery } from '@/store/services/customer';
 import { useGetAllItemsFromInventoryQuery } from '@/store/services/inventory';

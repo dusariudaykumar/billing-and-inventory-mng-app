@@ -1,11 +1,9 @@
 'use client';
 
-import { ColumnDef } from '@tanstack/react-table';
-
 import { DataTableColumnHeader } from '@/components/table/data-table-column-header';
 import { Checkbox } from '@/components/ui/checkbox';
-
 import { ContactDetails } from '@/interfaces/response.interface';
+import { ColumnDef } from '@tanstack/react-table';
 
 interface SupplierColumn {
   id: string;
