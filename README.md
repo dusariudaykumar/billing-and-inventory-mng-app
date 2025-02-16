@@ -2,7 +2,6 @@
 
 This is a [Next.js](https://nextjs.org/) boilerplate project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/blob/canary/examples/with-mongodb-mongoose) using [mongoose](https://mongoosejs.com/) for MongoDB database connection and schemas.
 
-
 ## About
 
 ⚙️ The project is created with [Next.js](https://nextjs.org/) with [MongoDB](https://www.mongodb.com/). [More info](https://github.com/vercel/next.js/tree/canary/examples/with-mongodb-mongoose)
