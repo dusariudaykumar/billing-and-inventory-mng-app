@@ -15,9 +15,9 @@ interface GlobalWithMongoose extends Global {
 
 declare const global: GlobalWithMongoose;
 
-const MONGODB_URI: string = process.env.MONGODB_URI!;
+const MONGODB_URI = process.env.MONGODB_URI!;
 
-if (!MONGODB_URI) {
+if (MONGODB_URI) {
   throw new Error('Invalid/Missing environment variable: "MONGODB_URI"');
 }
 

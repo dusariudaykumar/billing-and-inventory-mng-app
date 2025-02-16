@@ -1,9 +1,4 @@
-import logger from 'lib/logger';
-import _ from 'lodash';
-import { NextApiRequest, NextApiResponse } from 'next';
-
 import { textToMongoRegExpStatements } from '@/lib/mongo-funs';
-
 import { withAuth } from '@/middleware/with-auth-api-middleware';
 import { Inventory as InvetoryInterface } from '@/models/inventory/interface';
 import {
@@ -11,6 +6,9 @@ import {
   getAllItemsFromInventory,
   isInventoryItemExists,
 } from '@/models/inventory/inventory.service';
+import logger from 'lib/logger';
+import _ from 'lodash';
+import { NextApiRequest, NextApiResponse } from 'next';
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { method, body, query } = req;

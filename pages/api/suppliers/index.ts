@@ -1,14 +1,12 @@
-import logger from 'lib/logger';
-
-import { NextApiRequest, NextApiResponse } from 'next';
-
 import { withAuth } from '@/middleware/with-auth-api-middleware';
+import { ISupplier } from '@/models/suppliers/interface';
 import {
   createSupplier,
   getAllSuppliers,
   isSupplierExists,
 } from '@/models/suppliers/supplier.service';
-import { ISupplier } from '@/models/suppliers/interface';
+import logger from 'lib/logger';
+import { NextApiRequest, NextApiResponse } from 'next';
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { method, body } = req;

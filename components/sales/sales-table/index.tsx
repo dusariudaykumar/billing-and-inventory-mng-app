@@ -5,12 +5,10 @@ import { Button } from '@/components/ui/button';
 import { CirclePlus } from 'lucide-react';
 
 import { columns } from '@/components/sales/sales-table/columns';
-import { useLoading } from '@/context/loader-provider';
 import { useGetAllSalesQuery } from '@/store/services/sales';
 import Link from 'next/link';
 
 const SalesTable = () => {
-  const { hideLoader, showLoader } = useLoading();
   const { data } = useGetAllSalesQuery({});
 
   return (

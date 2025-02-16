@@ -1,3 +1,5 @@
+import { textToMongoRegExpStatements } from '@/lib/mongo-funs';
+import { withAuth } from '@/middleware/with-auth-api-middleware';
 import logger from 'lib/logger';
 import _ from 'lodash';
 import {
@@ -7,10 +9,6 @@ import {
 } from 'models/customers/customer.service';
 import { ICustomer } from 'models/customers/interface';
 import { NextApiRequest, NextApiResponse } from 'next';
-
-import { textToMongoRegExpStatements } from '@/lib/mongo-funs';
-
-import { withAuth } from '@/middleware/with-auth-api-middleware';
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { method, body, query } = req;
