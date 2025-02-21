@@ -103,3 +103,15 @@ export const createInvoice = async (payload: ISales) => {
     throw new Error(`Error creating invoice: ${error?.message}`);
   }
 };
+
+export const getSalesById = async (id: mongoose.Types.ObjectId) => {
+  try {
+    const sales = await Sales.findOne({ _id: id }).populate({
+      path: 'customerId',
+      select: '-createdAt -updatedAt -__v',
+    });
+    return sales;
+  } catch (error: any) {
+    throw new Error(`Error fetching invoice: ${error?.message}`);
+  }
+};

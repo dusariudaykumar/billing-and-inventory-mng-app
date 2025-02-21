@@ -15,6 +15,7 @@ import { InvoiceStatus, Sale } from '@/interfaces/response.interface';
 import { cn } from '@/lib/utils';
 import { ColumnDef } from '@tanstack/react-table';
 import { MoreHorizontal } from 'lucide-react';
+import Link from 'next/link';
 
 export const columns: ColumnDef<Sale>[] = [
   {
@@ -49,6 +50,7 @@ export const columns: ColumnDef<Sale>[] = [
     cell: ({ row }) => {
       const {
         customerInfo: { name },
+        _id,
       } = row.original;
       return (
         <div className='flex items-center gap-2'>
@@ -57,7 +59,11 @@ export const columns: ColumnDef<Sale>[] = [
               {name?.slice(0, 2)?.toLocaleUpperCase()}
             </AvatarFallback>
           </Avatar>
-          <p className='text-sm'>{name}</p>
+          <Link href={`/view-invoice/${_id}`}>
+            <p className='text-sm text-blue-600 underline underline-offset-2'>
+              {name}
+            </p>
+          </Link>
         </div>
       );
     },
@@ -67,9 +73,27 @@ export const columns: ColumnDef<Sale>[] = [
   {
     accessorKey: 'totalAmount',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Amount' />
+      <DataTableColumnHeader column={column} title='Total Amount' />
     ),
     cell: ({ row }) => <div>₹{row.getValue('totalAmount')}</div>,
+    enableSorting: true,
+    enableHiding: true,
+  },
+  {
+    accessorKey: 'customerPaid',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Customer Paid' />
+    ),
+    cell: ({ row }) => <div>₹{row.getValue('customerPaid')}</div>,
+    enableSorting: true,
+    enableHiding: true,
+  },
+  {
+    accessorKey: 'dueAmount',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Due Amount' />
+    ),
+    cell: ({ row }) => <div>₹{row.getValue('dueAmount')}</div>,
     enableSorting: true,
     enableHiding: true,
   },

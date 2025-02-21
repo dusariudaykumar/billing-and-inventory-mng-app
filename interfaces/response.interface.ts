@@ -149,3 +149,9 @@ export interface Sale {
 export type GetAllSalesAPIResponse = IResponse<
   PaginatedResponse & { sales: Sale[] }
 >;
+
+export type GetInvoiceAPIResponse = IResponse<
+  Omit<Sale, 'customerInfo' | 'customerId'> & {
+    customerId: Omit<Customer, 'createdAt' | 'updatedAt'>;
+  }
+>;

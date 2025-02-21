@@ -4,11 +4,17 @@ import * as salesControllers from '../../../models/sales/sales.controller';
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { method } = req;
+  const { id } = req.query;
 
   switch (method) {
     case 'GET':
-      return await salesControllers.handleGetSales(req, res);
-    case 'POST': // create customer
+      if (id) {
+        // get sales by ID
+        return await salesControllers.handleGetInvoice(req, res);
+      } else {
+        return await salesControllers.handleGetSales(req, res);
+      }
+    case 'POST': // create sales
       return await salesControllers.handleCreateInvoice(req, res);
     default:
       res.setHeader('Allow', ['GET']);
