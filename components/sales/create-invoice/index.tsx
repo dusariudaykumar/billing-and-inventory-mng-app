@@ -34,7 +34,6 @@ interface FormErrors {
   invoiceDate?: string;
   paymentMethod?: string;
   products?: string;
-  vehicleNumber?: string;
   invoiceNumber?: string;
 }
 
@@ -47,7 +46,7 @@ interface SelectedItems
     Inventory,
     'updatedAt' | 'createdAt' | 'purchasePrice' | 'quantity'
   > {
-  availableQuantity: number;
+  // availableQuantity: number;
   invoiceQuantity: number;
   discount: number;
   amount: number;
@@ -62,6 +61,11 @@ interface FormData {
   notes: string;
   vehicleNumber: string;
   invoiceNumber: string;
+}
+interface Calculation {
+  beforeDiscountTotalAmount: number;
+  afterDiscountTotalAmount: number;
+  discount: number;
 }
 
 const CreateInvoice = () => {
@@ -79,6 +83,11 @@ const CreateInvoice = () => {
   const [selectedItem, setSelectedItem] = useState<Inventory | null>(null);
   const [errors, setErrors] = useState<FormErrors>({});
   const [selectedProducts, setSelectedProducts] = useState<SelectedItems[]>([]);
+  const [calculations, setCalculations] = useState<Calculation>({
+    afterDiscountTotalAmount: 0,
+    beforeDiscountTotalAmount: 0,
+    discount: 0,
+  });
   const [customerParams, setCustomerParams] = useState<BasicQueryParams>({
     limit: 10,
     page: 1,
@@ -135,9 +144,6 @@ const CreateInvoice = () => {
       newErrors.products = 'At least one product is required';
     }
 
-    if (!formData.vehicleNumber) {
-      newErrors.vehicleNumber = 'Please enter vehicle number';
-    }
     if (!formData.invoiceNumber) {
       newErrors.invoiceNumber = 'Please enter invoice number';
     }
@@ -168,7 +174,7 @@ const CreateInvoice = () => {
       e.preventDefault();
       if (validateForm()) {
         const items: Item[] = selectedProducts.map(
-          ({ _id, availableQuantity, invoiceQuantity, __v, ...rest }) => ({
+          ({ _id, invoiceQuantity, __v, ...rest }) => ({
             ...rest,
             itemId: _id,
             quantity: invoiceQuantity,
@@ -198,13 +204,12 @@ const CreateInvoice = () => {
         const updatedProducts = [...prev];
         const product = updatedProducts[index];
         // Cap the invoice quantity to the available quantity.
-        const invoiceQuantity =
-          quantity > product.availableQuantity
-            ? product.availableQuantity
-            : quantity;
-        product.invoiceQuantity = invoiceQuantity;
-        product.amount =
-          product.sellingPrice * invoiceQuantity - product.discount;
+        // const invoiceQuantity =
+        //   quantity > product.availableQuantity
+        //     ? product.availableQuantity
+        //     : quantity;
+        product.invoiceQuantity = quantity;
+        product.amount = product.sellingPrice * quantity - product.discount;
         return updatedProducts;
       });
     },
@@ -346,9 +351,7 @@ const CreateInvoice = () => {
           </div>
           {/* Vehicle Number */}
           <div className='relative space-y-2'>
-            <Label>
-              Vehicle Number <span className='ml-1 text-red-500'>*</span>
-            </Label>
+            <Label>Vehicle Number</Label>
             <Input
               onChange={(e) =>
                 handleInputChange('vehicleNumber', e.target.value)
@@ -356,11 +359,6 @@ const CreateInvoice = () => {
               value={formData.vehicleNumber}
               placeholder='TG 08 M 0000'
             />
-            {errors.vehicleNumber && (
-              <p className='absolute bottom-[-20px] text-sm text-red-500'>
-                {errors.vehicleNumber}
-              </p>
-            )}
           </div>
 
           {/* Invoice Status */}
@@ -497,7 +495,7 @@ const CreateInvoice = () => {
                         }
                         className='w-20'
                         min={1}
-                        max={product.availableQuantity}
+                        // max={product.availableQuantity}
                       />
                     </td>
                     <td className='px-4 py-3'>
