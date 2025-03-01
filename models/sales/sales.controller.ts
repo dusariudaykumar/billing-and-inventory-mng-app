@@ -50,12 +50,7 @@ export const handleCreateInvoice = async (
 ) => {
   try {
     const payload = req.body as ISales;
-    if (
-      !payload ||
-      !payload.items?.length ||
-      !payload.vehicleNumber ||
-      !payload.customerId
-    ) {
+    if (!payload || !payload.items?.length || !payload.customerId) {
       return res.status(400).json({
         success: false,
         message: 'Required fields are missing',

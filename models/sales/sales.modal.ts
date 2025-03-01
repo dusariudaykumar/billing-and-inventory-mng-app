@@ -15,7 +15,8 @@ const salesSchema = new mongoose.Schema<ISalesDoc, ISalesModel>(
     },
     vehicleNumber: {
       type: String,
-      required: true,
+      required: false,
+      default: null,
     },
     invoiceDate: {
       type: Date,
