@@ -1,23 +1,17 @@
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 
-interface DecodedToken extends JwtPayload {
-  exp: number;
-}
-
-export const verifyToken = (token: string): DecodedToken => {
+/**
+ * Verifies a JWT token and returns decoded user info.
+ * @param token - JWT Token
+ * @returns Decoded user payload
+ * @throws Error if token is invalid or expired
+ */
+export const verifyToken = (token: string) => {
   try {
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECREAT || 'test'
-    ) as unknown as DecodedToken;
-
-    // check if token is expired
-    if (decoded.exp < Date.now() / 1000) {
-      throw new Error('Token expired');
-    }
-
-    return decoded;
+    return jwt.verify(token, process.env.JWT_SECRET as string) as {
+      sub: string;
+    };
   } catch (error) {
-    throw new Error('Invalid token');
+    throw new Error('Invalid or expired token');
   }
 };

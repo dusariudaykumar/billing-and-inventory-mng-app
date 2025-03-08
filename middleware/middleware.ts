@@ -1,22 +1,18 @@
-import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  const token = request.cookies.get('token')?.value;
-  const isLoginPage = request.nextUrl.pathname === '/login';
+  const token = request.cookies.get('token')?.value || null;
+  const { pathname } = request.nextUrl;
 
-  // Redirect authenticated users away from login page
+  const isProtectedRoute = !['/login', '/signup'].includes(pathname);
+  const isLoginPage = pathname === '/login';
+
   if (isLoginPage && token) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  // Allow access to login page
-  if (isLoginPage) {
-    return NextResponse.next();
-  }
-
-  // Protect all other routes
-  if (!token) {
+  if (isProtectedRoute && !token) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 

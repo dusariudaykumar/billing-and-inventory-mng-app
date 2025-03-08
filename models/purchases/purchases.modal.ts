@@ -1,17 +1,24 @@
 import mongoose from 'mongoose';
-
 import { IPurchasesDoc, IPurchasesModel } from './interface';
 
 const purchasesSchema = new mongoose.Schema<IPurchasesDoc, IPurchasesModel>(
   {
     supplierId: {
       type: mongoose.Schema.Types.ObjectId,
+      ref: 'Supplier', // Reference supplier model
       required: true,
     },
-    items: {
-      type: [],
-      required: true,
-    },
+    items: [
+      {
+        itemId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Inventory',
+          required: true,
+        },
+        quantity: { type: Number, required: true },
+        price: { type: Number, required: true },
+      },
+    ],
     amountPaid: {
       type: Number,
       required: true,
@@ -25,9 +32,7 @@ const purchasesSchema = new mongoose.Schema<IPurchasesDoc, IPurchasesModel>(
       required: true,
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 const Purchases =
