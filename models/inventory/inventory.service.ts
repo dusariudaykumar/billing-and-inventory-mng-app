@@ -1,5 +1,6 @@
 import { Inventory as InventoryInterface } from '@/models/inventory/interface';
 import Inventory from '@/models/inventory/inventory.model';
+import mongoose from 'mongoose';
 
 export const getAllItemsFromInventory = async (
   query: object,
@@ -28,4 +29,12 @@ export const addNewItemToInventory = async (payload: InventoryInterface) => {
 export const isInventoryItemExists = async (itemName: string) => {
   const isExists = await Inventory.findOne({ name: itemName });
   return !!isExists;
+};
+
+export const deleteInventoryItemById = async (id: mongoose.Types.ObjectId) => {
+  try {
+    await Inventory.deleteOne({ _id: id });
+  } catch (error: any) {
+    throw new Error(`Error deleting invoice: ${error?.message}`);
+  }
 };

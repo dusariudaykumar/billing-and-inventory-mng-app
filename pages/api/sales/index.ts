@@ -1,25 +1,25 @@
 import { withAuth } from '@/middleware/with-auth-api-middleware';
+import * as salesControllers from '@/models/sales/sales.controller';
 import { NextApiRequest, NextApiResponse } from 'next';
-import * as salesControllers from '../../../models/sales/sales.controller';
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { method } = req;
-  const { id } = req.query;
-
-  switch (method) {
+  switch (req.method) {
     case 'GET':
-      if (id) {
-        // get sales by ID
-        return await salesControllers.handleGetInvoice(req, res);
-      } else {
-        return await salesControllers.handleGetSales(req, res);
-      }
-    case 'POST': // create sales
-      return await salesControllers.handleCreateInvoice(req, res);
+      return req.query.id
+        ? salesControllers.handleGetInvoice(req, res)
+        : salesControllers.handleGetSales(req, res);
+    case 'POST':
+      return salesControllers.handleCreateInvoice(req, res);
+    case 'PUT':
+      return salesControllers.handleUpdateInvoice(req, res);
+    case 'DELETE':
+      return salesControllers.handleDeleteInvoiceById(req, res);
     default:
-      res.setHeader('Allow', ['GET']);
-      res.status(405).send(`Method ${method} is not allowed.`);
-      break;
+      res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
+      return res.status(405).json({
+        success: false,
+        message: `Method ${req.method} is not allowed.`,
+      });
   }
 }
 

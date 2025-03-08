@@ -1,69 +1,23 @@
 import { withAuth } from '@/middleware/with-auth-api-middleware';
-import { ISupplier } from '@/models/suppliers/interface';
-import {
-  createSupplier,
-  getAllSuppliers,
-  isSupplierExists,
-} from '@/models/suppliers/supplier.service';
-import logger from 'lib/logger';
+import * as supplierControllers from '@/models/suppliers/supplier.controller';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { method, body } = req;
-
-  switch (method) {
+  switch (req.method) {
     case 'GET':
-      try {
-        const suppliers = await getAllSuppliers();
-        return res.status(200).json({ success: true, data: suppliers });
-      } catch (e) {
-        logger(e);
-        return res.status(500).json({
-          success: false,
-          message: 'Somthing went wrong. Please try again',
-        });
-      }
-    case 'POST': // create supplier
-      try {
-        const payload = body as ISupplier;
-        if (
-          !payload ||
-          !payload.companyName ||
-          !payload.contactDetails ||
-          !payload.name
-        ) {
-          return res
-            .status(400)
-            .send({ success: false, message: 'Required fields are missing' });
-        }
-
-        // check if supplier already exists
-        const isExist = await isSupplierExists(
-          payload.name,
-          payload.companyName
-        );
-
-        if (!isExist) {
-          const newSupplier = await createSupplier(payload);
-          return res.status(201).send({
-            success: true,
-            data: newSupplier,
-            message: 'Successfully created supplier!',
-          });
-        }
-        return res
-          .status(400)
-          .send({ success: false, message: 'Supplier already exists' });
-      } catch (error) {
-        return res.status(500).json({
-          success: false,
-          message: 'Somthing went wrong. Please try again',
-        });
-      }
+      return supplierControllers.handleGetSuppliers(req, res);
+    case 'POST':
+      return supplierControllers.handleCreateSupplier(req, res);
+    case 'PUT':
+      return supplierControllers.handleUpdateSupplier(req, res);
+    case 'DELETE':
+      return supplierControllers.handleDeleteSupplier(req, res);
     default:
-      res.setHeader('Allow', ['GET']);
-      res.status(405).send(`Method ${method} is not allowed.`);
-      break;
+      res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
+      return res.status(405).json({
+        success: false,
+        message: `Method ${req.method} is not allowed.`,
+      });
   }
 }
 

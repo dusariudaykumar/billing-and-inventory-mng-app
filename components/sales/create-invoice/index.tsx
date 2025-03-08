@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { currencyFormat } from '@/helpers/currency-format';
 import { useDebounce } from '@/hooks/use-debounce';
 import {
   BasicQueryParams,
@@ -22,10 +23,12 @@ import {
   InvoiceStatus,
   PaymentMethods,
 } from '@/interfaces/response.interface';
+import logger from '@/lib/logger';
 import { useGetAllCustomersQuery } from '@/store/services/customer';
 import { useGetAllItemsFromInventoryQuery } from '@/store/services/inventory';
 import { useCreateInvoiceMutation } from '@/store/services/sales';
-import { Minus, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Loader2, Minus, Plus, Trash2 } from 'lucide-react';
+import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 // Form error types remain unchanged.
@@ -69,6 +72,7 @@ interface Calculation {
 }
 
 const CreateInvoice = () => {
+  const router = useRouter();
   const [formData, setFormData] = useState<FormData>({
     customerId: '',
     invoiceDate: new Date(),
@@ -101,7 +105,7 @@ const CreateInvoice = () => {
     page: 1,
   });
 
-  const [createInvoice] = useCreateInvoiceMutation();
+  const [createInvoice, { isLoading }] = useCreateInvoiceMutation();
 
   // Debounce search inputs.
   const debouncedCustomerSearch = useDebounce(customerParams.search);
@@ -184,17 +188,25 @@ const CreateInvoice = () => {
         const invoiceData: CreateInvoicePayload = {
           ...formData,
           dueAmount:
-            billingInfo.afterDiscountTotalAmount - formData.customerPaid,
+            calculations.afterDiscountTotalAmount - formData.customerPaid,
           items,
-          totalAmount: billingInfo.afterDiscountTotalAmount,
-          discount: billingInfo.totalDiscount,
+          totalAmount: calculations.afterDiscountTotalAmount,
+          discount: calculations.discount,
           notes: formData.notes,
         };
-        console.log('Form submitted:', invoiceData);
-        await createInvoice(invoiceData);
+        logger(invoiceData, 'Form submitted:');
+        await createInvoice(invoiceData).unwrap();
+        router.push('/sales');
       }
     },
-    [formData, selectedProducts, validateForm]
+    [
+      calculations.afterDiscountTotalAmount,
+      calculations.discount,
+      createInvoice,
+      formData,
+      selectedProducts,
+      validateForm,
+    ]
   );
 
   // Update the invoice quantity while capping it to the available stock.
@@ -235,39 +247,23 @@ const CreateInvoice = () => {
     console.log('Available inventory items:', inventoryItems);
   }, [inventoryItems]);
 
-  // Compute billing totals based on selected products.
-  const billingInfo = useMemo(() => {
-    const info = {
-      beforeDiscountTotalAmount: 0,
-      afterDiscountTotalAmount: 0,
-      totalDiscount: 0,
-    };
-    selectedProducts.forEach((product) => {
-      // Multiply selling price by the ordered quantity.
-      info.beforeDiscountTotalAmount +=
-        product.sellingPrice * product.invoiceQuantity;
-      info.afterDiscountTotalAmount += product.amount;
-      info.totalDiscount += product.discount;
-    });
-    return info;
-  }, [selectedProducts]);
-
-  // If status is PAID, ensure customerPaid equals afterDiscountTotalAmount.
   useEffect(() => {
-    if (
-      formData.status === InvoiceStatus.PAID &&
-      formData.customerPaid !== billingInfo.afterDiscountTotalAmount
-    ) {
-      setFormData((prev) => ({
-        ...prev,
-        customerPaid: billingInfo.afterDiscountTotalAmount,
-      }));
-    }
-  }, [
-    billingInfo.afterDiscountTotalAmount,
-    formData.status,
-    formData.customerPaid,
-  ]);
+    let beforeDiscountTotalAmount = 0;
+    let afterDiscountTotalAmount = 0;
+
+    selectedProducts.forEach((product) => {
+      beforeDiscountTotalAmount +=
+        product.sellingPrice * product.invoiceQuantity;
+      afterDiscountTotalAmount +=
+        beforeDiscountTotalAmount - calculations.discount;
+    });
+
+    setCalculations((prev) => ({
+      ...prev,
+      beforeDiscountTotalAmount,
+      afterDiscountTotalAmount,
+    }));
+  }, [calculations.discount, selectedProducts]);
 
   return (
     <div className='flex h-full w-full flex-1 flex-col space-y-8 overflow-auto p-8'>
@@ -430,7 +426,7 @@ const CreateInvoice = () => {
                   ...prev,
                   {
                     ...rest,
-                    availableQuantity: quantity, // available stock from inventory
+                    // availableQuantity: quantity, // available stock from inventory
                     invoiceQuantity: 1, // default invoice quantity
                     discount: 0,
                     amount: rest.sellingPrice, // initial amount = sellingPrice * 1
@@ -467,9 +463,9 @@ const CreateInvoice = () => {
                   <th className='px-4 py-3 text-left text-sm font-semibold'>
                     Rate
                   </th>
-                  <th className='px-4 py-3 text-left text-sm font-semibold'>
+                  {/* <th className='px-4 py-3 text-left text-sm font-semibold'>
                     Discount
-                  </th>
+                  </th> */}
                   <th className='px-4 py-3 text-left text-sm font-semibold'>
                     Amount
                   </th>
@@ -486,7 +482,7 @@ const CreateInvoice = () => {
                     <td className='px-4 py-3'>
                       <Input
                         type='number'
-                        value={product.invoiceQuantity}
+                        value={product.invoiceQuantity.toString()}
                         onChange={(e) =>
                           handleProductQuantityChange(
                             index,
@@ -501,16 +497,16 @@ const CreateInvoice = () => {
                     <td className='px-4 py-3'>
                       ₹{product.sellingPrice.toFixed(2)}
                     </td>
-                    <td className='px-4 py-3'>
+                    {/* <td className='px-4 py-3'>
                       ₹{product.discount.toFixed(2)}
-                    </td>
+                    </td> */}
                     <td className='px-4 py-3'>₹{product.amount.toFixed(2)}</td>
                     <td className='px-4 py-3'>
                       <div className='flex gap-2'>
                         {/* Edit functionality not implemented */}
-                        <Button type='button' size='icon' variant='ghost'>
+                        {/* <Button type='button' size='icon' variant='ghost'>
                           <Pencil className='h-4 w-4' />
-                        </Button>
+                        </Button> */}
                         <Button
                           type='button'
                           size='icon'
@@ -541,7 +537,7 @@ const CreateInvoice = () => {
 
         <div className='mt-6 flex w-full gap-6'>
           {/* Notes Section */}
-          <div className='flex w-full flex-col gap-2'>
+          <div className='flex w-full flex-col flex-wrap gap-2'>
             <Label htmlFor='notes'>Notes</Label>
             <Textarea
               placeholder='Enter Notes'
@@ -555,15 +551,35 @@ const CreateInvoice = () => {
           <div className='flex w-full flex-col gap-2'>
             <div className='flex items-center justify-between'>
               <span>Total Amount Before Discount</span>
-              <span>₹{billingInfo.beforeDiscountTotalAmount.toFixed(2)}</span>
+              <span>
+                {currencyFormat(calculations.beforeDiscountTotalAmount)}
+              </span>
             </div>
             <div className='flex items-center justify-between'>
               <span>Discount</span>
-              <span>₹{billingInfo.totalDiscount.toFixed(2)}</span>
+              <div className='flex items-center justify-center gap-1'>
+                <Minus />
+                ₹
+                <Input
+                  className='max-w-[150px]'
+                  type='number'
+                  value={calculations.discount.toString()}
+                  max={calculations.beforeDiscountTotalAmount}
+                  onChange={(e) => {
+                    const discountAmount = Number(e.target.value);
+                    setCalculations((prev) => ({
+                      ...prev,
+                      discount: discountAmount,
+                    }));
+                  }}
+                />
+              </div>
             </div>
             <div className='flex items-center justify-between'>
               <span>Total Amount After Discount</span>
-              <span>₹{billingInfo.afterDiscountTotalAmount.toFixed(2)}</span>
+              <span>
+                {currencyFormat(calculations.afterDiscountTotalAmount)}
+              </span>
             </div>
 
             <div className='flex items-center justify-between'>
@@ -576,16 +592,16 @@ const CreateInvoice = () => {
                   type='number'
                   // Enable input only when status is PARTIALLY_PAID.
                   disabled={formData.status !== InvoiceStatus.PARTIALLY_PAID}
-                  value={formData.customerPaid}
-                  max={billingInfo.afterDiscountTotalAmount}
+                  value={formData.customerPaid.toString()}
+                  max={calculations.afterDiscountTotalAmount}
                   onChange={(e) => {
                     const amountPaid = Number(e.target.value);
                     // If the entered amount meets/exceeds the total, mark as PAID.
-                    if (amountPaid >= billingInfo.afterDiscountTotalAmount) {
+                    if (amountPaid >= calculations.afterDiscountTotalAmount) {
                       handleInputChange('status', InvoiceStatus.PAID);
                       handleInputChange(
                         'customerPaid',
-                        billingInfo.afterDiscountTotalAmount
+                        calculations.afterDiscountTotalAmount
                       );
                     } else {
                       handleInputChange('customerPaid', amountPaid);
@@ -598,17 +614,24 @@ const CreateInvoice = () => {
             <div className='flex items-center justify-between'>
               <span>Total Amount</span>
               <span>
-                ₹
-                {(
-                  billingInfo.afterDiscountTotalAmount - formData.customerPaid
-                ).toFixed(2)}
+                {currencyFormat(
+                  calculations.afterDiscountTotalAmount - formData.customerPaid
+                )}
               </span>
             </div>
           </div>
         </div>
 
         <div className='mt-6 flex w-full items-end'>
-          <Button type='submit'>Create Invoice</Button>
+          <Button type='submit' disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <Loader2 className='animate-spin' />
+              </>
+            ) : (
+              'Create Invoice'
+            )}
+          </Button>
         </div>
       </form>
     </div>

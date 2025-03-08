@@ -6,7 +6,6 @@ import mongoose from 'mongoose';
 /**
  * Fetch paginated sales records with working search filter.
  */
-
 export const getAllSales = async (query: any, limit: number, page: number) => {
   try {
     const skip = (page - 1) * limit;
@@ -20,19 +19,8 @@ export const getAllSales = async (query: any, limit: number, page: number) => {
           as: 'customerInfo',
         },
       },
-      {
-        $unwind: { path: '$customerInfo', preserveNullAndEmptyArrays: true },
-      },
-      {
-        $match: query,
-      },
-      {
-        $project: {
-          'customerInfo.createdAt': 0,
-          'customerInfo.updatedAt': 0,
-          'customerInfo.__v': 0,
-        },
-      },
+      { $unwind: { path: '$customerInfo', preserveNullAndEmptyArrays: true } },
+      { $match: query },
       {
         $facet: {
           data: [
@@ -46,18 +34,13 @@ export const getAllSales = async (query: any, limit: number, page: number) => {
       {
         $addFields: {
           totalResults: {
-            $cond: {
-              if: { $eq: [{ $size: '$metadata' }, 0] },
-              then: 0,
-              else: { $arrayElemAt: ['$metadata.totalResults', 0] },
-            },
+            $ifNull: [{ $arrayElemAt: ['$metadata.totalResults', 0] }, 0],
           },
         },
       },
     ];
 
     const result = await Sales.aggregate(pipeline);
-
     return {
       sales: result[0]?.data || [],
       totalPages: Math.ceil((result[0]?.totalResults || 0) / limit),
@@ -68,6 +51,7 @@ export const getAllSales = async (query: any, limit: number, page: number) => {
     throw new Error(`Error fetching sales data: ${error?.message}`);
   }
 };
+
 /**
  * Create an invoice and update inventory accordingly.
  */
@@ -104,6 +88,19 @@ export const createInvoice = async (payload: ISales) => {
   }
 };
 
+/**
+ * Updates an invoice by ID.
+ */
+export const updateInvoiceById = async (
+  id: mongoose.Types.ObjectId,
+  payload: Partial<ISales>
+) => {
+  return await Sales.findByIdAndUpdate(id, payload, {
+    new: true,
+    runValidators: true,
+  });
+};
+
 export const getSalesById = async (id: mongoose.Types.ObjectId) => {
   try {
     const sales = await Sales.findOne({ _id: id }).populate({
@@ -114,4 +111,11 @@ export const getSalesById = async (id: mongoose.Types.ObjectId) => {
   } catch (error: any) {
     throw new Error(`Error fetching invoice: ${error?.message}`);
   }
+};
+
+/**
+ * Deletes an invoice by ID.
+ */
+export const deleteInvoiceById = async (id: mongoose.Types.ObjectId) => {
+  return await Sales.findByIdAndDelete(id);
 };
