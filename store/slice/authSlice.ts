@@ -1,4 +1,3 @@
-import { PayloadAction } from './../../node_modules/@reduxjs/toolkit/src/createAction';
 import { User } from '@/interfaces/response.interface';
 import { getFromLocalStorage } from '@/lib/helper';
 import { RootState } from '@/store';
@@ -6,7 +5,7 @@ import { authApi } from '@/store/services/auth';
 import { createSlice } from '@reduxjs/toolkit';
 
 interface AuthInitialState {
-  user: User;
+  user: User | null;
   loading: boolean;
   isAuthenticated: boolean;
 }
@@ -21,20 +20,7 @@ export const authSlice = createSlice({
   name: 'authSlice',
   initialState,
   reducers: {
-    updateUser: (state, { payload }: PayloadAction<User>) => {
-      state.user = payload;
-      localStorage.setItem('srd-user', JSON.stringify(payload));
-      state.isAuthenticated = true;
-    },
-    updateAuthLoading: (state, { payload }: PayloadAction<boolean>) => {
-      state.loading = payload;
-    },
-    logout: (state) => {
-      state.isAuthenticated = false;
-      state.user = {} as User;
-      state.loading = false;
-      localStorage.clear();
-    },
+    logout: (state) => resetUserInfo(state),
   },
   extraReducers: (builder) => {
     builder.addMatcher(
@@ -43,12 +29,9 @@ export const authSlice = createSlice({
         return updateUserInfo(state, payload?.data);
       }
     );
-    builder.addMatcher(
-      authApi.endpoints.verifyUser.matchPending,
-      (state, {}) => {
-        state.loading = true;
-      }
-    );
+    builder.addMatcher(authApi.endpoints.verifyUser.matchPending, (state) => {
+      state.loading = true;
+    });
     builder.addMatcher(
       authApi.endpoints.verifyUser.matchFulfilled,
       (state, { payload }) => {
@@ -67,6 +50,7 @@ export const authSlice = createSlice({
 });
 
 export const getUserData = (state: RootState) => state.authSlice;
+export const { logout } = authSlice.actions;
 
 const updateUserInfo = (
   state: AuthInitialState,
@@ -75,16 +59,17 @@ const updateUserInfo = (
   localStorage.setItem('srd-user', JSON.stringify(userInfo));
   return {
     ...state,
-    user: userInfo || ({} as User),
+    user: userInfo || null,
     isAuthenticated: true,
     loading: false,
   };
 };
 
 const resetUserInfo = (state: AuthInitialState) => {
+  localStorage.clear();
   return {
     ...state,
-    user: {} as User,
+    user: null,
     isAuthenticated: false,
     loading: false,
   };

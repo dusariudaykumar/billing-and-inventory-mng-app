@@ -14,7 +14,8 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import logger from '@/lib/logger';
-import { useLazyLogoutQuery } from '@/store/services/auth';
+import { useLogoutMutation } from '@/store/services/auth';
+
 import { ChevronsUpDown, LogOut } from 'lucide-react';
 
 export function NavUser({
@@ -27,7 +28,7 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar();
 
-  const [logout] = useLazyLogoutQuery();
+  const [logout] = useLogoutMutation();
 
   const logoutHandler = async () => {
     try {

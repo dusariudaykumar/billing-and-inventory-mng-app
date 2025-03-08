@@ -1,3 +1,5 @@
+'use client';
+
 export const Loader = () => {
   return (
     <div className='z-1000 fixed inset-0 flex items-center justify-center overflow-hidden bg-gray-200/70'>

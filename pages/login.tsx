@@ -1,12 +1,14 @@
+'use client';
+
+import { LoginForm } from '@/components/auth/login-form';
 import { useAppSelector } from '@/store/hooks';
 import { getUserData } from '@/store/slice/authSlice';
-import { LoginForm } from 'components/login-form';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 
 export default function Page() {
   const router = useRouter();
-  const { isAuthenticated } = useAppSelector(getUserData)!;
+  const { isAuthenticated } = useAppSelector(getUserData);
 
   useEffect(() => {
     if (isAuthenticated) {

@@ -1,3 +1,5 @@
+'use client';
+
 // import { Spinner } from '@/components/ui/';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
 import { Command as CommandPrimitive } from 'cmdk';

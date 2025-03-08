@@ -1,3 +1,5 @@
+'use client';
+
 import { AutoComplete } from '@/components/auto-complete';
 import { CalendarForm } from '@/components/calendar';
 import { Button } from '@/components/ui/button';

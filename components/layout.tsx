@@ -1,3 +1,5 @@
+'use client';
+
 import { Separator } from '@radix-ui/react-separator';
 import * as React from 'react';
 
@@ -8,7 +10,7 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 
-import { ProtectedRoute } from '@/routes/protected-route';
+import ProtectedRoute from '@/routes/protected-route';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (

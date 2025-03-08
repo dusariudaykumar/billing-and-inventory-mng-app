@@ -1,7 +1,8 @@
+'use client';
+
+import { useLazyVerifyUserQuery } from '@/store/services/auth';
 import { useRouter } from 'next/router';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-
-import { useVerifyUserQuery } from '@/store/services/auth';
 
 type LoadingContextType = {
   isLoading: boolean;
@@ -19,20 +20,17 @@ export function LoaderProvider({ children }: { children: React.ReactNode }) {
 
   const showLoader = () => setIsLoading(true);
   const hideLoader = () => setIsLoading(false);
-  const skipVerification = pathname === '/login';
 
-  const { isError, refetch } = useVerifyUserQuery(undefined, {
-    skip: skipVerification,
-  });
+  const skipVerification =
+    pathname === '/login' || router.pathname === '/signup';
+  const [verifyUser] = useLazyVerifyUserQuery();
 
   useEffect(() => {
     if (!skipVerification) {
-      refetch();
+      verifyUser();
     }
-    if (isError) {
-      router.push('/login');
-    }
-  }, [skipVerification, refetch, router, isError]);
+  }, [skipVerification, verifyUser]);
+
   return (
     <LoaderContext.Provider value={{ isLoading, showLoader, hideLoader }}>
       {children}

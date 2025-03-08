@@ -1,10 +1,10 @@
 import { UserAPIResponse } from '@/interfaces/response.interface';
-import { baseQuery } from '@/store/base-query';
+import { customBaseQuery } from '@/store/base-query';
 import { createApi } from '@reduxjs/toolkit/query/react';
 
 export const authApi = createApi({
   reducerPath: 'auth',
-  baseQuery: baseQuery,
+  baseQuery: customBaseQuery,
   endpoints: (builder) => ({
     login: builder.mutation<
       UserAPIResponse,
@@ -16,19 +16,29 @@ export const authApi = createApi({
         body: payload,
       }),
     }),
+    signup: builder.mutation<
+      UserAPIResponse,
+      { name: string; email: string; password: string }
+    >({
+      query: (payload) => ({
+        url: `/auth`,
+        method: 'PUT',
+        body: payload,
+      }),
+    }),
     verifyUser: builder.query<UserAPIResponse, void>({
       query: () => `/auth`,
     }),
-    logout: builder.query<void, void>({
-      query: () => {
-        return {
-          url: `/auth`,
-          method: 'DELETE',
-        };
-      },
+    logout: builder.mutation<undefined, void>({
+      query: () => ({ url: `/auth`, method: 'DELETE' }),
     }),
   }),
 });
 
-export const { useLoginMutation, useLazyLogoutQuery, useVerifyUserQuery } =
-  authApi;
+export const {
+  useLoginMutation,
+  useLogoutMutation,
+  useVerifyUserQuery,
+  useLazyVerifyUserQuery,
+  useSignupMutation,
+} = authApi;
