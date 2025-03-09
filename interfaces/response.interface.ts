@@ -57,6 +57,7 @@ export interface CreateCustomerPayload
 
 export type CreateCutomerAPIResponse = IResponse<Customer>;
 
+export type UpdateCustomerAPIResponse = IResponse<Customer>;
 // Suppliers
 
 export interface Supplier {
@@ -68,7 +69,9 @@ export interface Supplier {
   updatedAt: string;
 }
 
-export type GetAllSuppliersAPIResponse = IResponse<Supplier[]>;
+export type GetAllSuppliersAPIResponse = IResponse<
+  PaginatedResponse & { suppliers: Supplier[] }
+>;
 
 export type CreateSupplierPayload = Omit<
   Supplier,
@@ -76,6 +79,8 @@ export type CreateSupplierPayload = Omit<
 >;
 
 export type CreateSupplierAPIResponse = IResponse<Supplier>;
+
+export type UpdateSupplierAPIResponse = IResponse<Supplier>;
 
 // Inventory
 
@@ -100,6 +105,8 @@ export type AddNewItemToInventoryPayload = Omit<
   '_id' | 'createdAt' | 'updatedAt' | '__v'
 >;
 export type AddNewItemToInventoryAPIResponse = IResponse<Inventory>;
+
+export type UpdateInventoryItemAPIResponse = IResponse<Inventory>;
 
 export enum InvoiceStatus {
   PAID = 'Paid',
@@ -155,3 +162,5 @@ export type GetInvoiceAPIResponse = IResponse<
     customerId: Omit<Customer, 'createdAt' | 'updatedAt'>;
   }
 >;
+
+export type UpdateInvoiceAPIResponse = IResponse<Sale>;

@@ -1,15 +1,21 @@
 'use client';
 
-import { columns } from '@/components/inventory/columns';
+import AlertDialoagModal from '@/components/alert-dailog-modal';
+import { getInventoryColumns } from '@/components/inventory/columns';
 import { ItemModal } from '@/components/inventory/inventory-modal';
 import { DataTable } from '@/components/table/data-table';
 import { Button } from '@/components/ui/button';
 import { useLoading } from '@/context/loader-provider';
-import { AddNewItemToInventoryPayload } from '@/interfaces/response.interface';
+import {
+  AddNewItemToInventoryPayload,
+  Inventory,
+} from '@/interfaces/response.interface';
 import logger from '@/lib/logger';
 import {
   useAddNewItemToInventoryMutation,
+  useDeleteInventoryItemMutation,
   useGetAllItemsFromInventoryQuery,
+  useUpdateInventoryItemMutation,
 } from '@/store/services/inventory';
 import { CirclePlus } from 'lucide-react';
 import { useState } from 'react';
@@ -18,19 +24,64 @@ const InventoryTable = () => {
   const { hideLoader, showLoader } = useLoading();
   const { data } = useGetAllItemsFromInventoryQuery({});
   const [addNewItemToInventory] = useAddNewItemToInventoryMutation();
+  const [updateInventoryItem] = useUpdateInventoryItemMutation();
+  const [deleteInventoryItem] = useDeleteInventoryItemMutation();
 
   const [openInventoryModel, setOpenInventoryModel] = useState<boolean>(false);
+  const [selectedItem, setSelectedItem] = useState<Inventory | undefined>();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
+  const [itemToDelete, setItemToDelete] = useState<string | undefined>();
 
   const addNewItem = async (newItem: AddNewItemToInventoryPayload) => {
     try {
       showLoader();
-      const response = await addNewItemToInventory(newItem).unwrap();
-      logger(response);
+      await addNewItemToInventory(newItem).unwrap();
     } catch (error) {
       logger(error);
     } finally {
       hideLoader();
     }
+  };
+
+  const updateItem = async (item: AddNewItemToInventoryPayload) => {
+    if (!selectedItem) return;
+
+    try {
+      showLoader();
+      await updateInventoryItem({
+        id: selectedItem._id,
+        payload: item,
+      }).unwrap();
+    } catch (error) {
+      logger(error);
+    } finally {
+      hideLoader();
+    }
+  };
+
+  const handleDeleteItem = async () => {
+    if (!itemToDelete) return;
+
+    try {
+      showLoader();
+      await deleteInventoryItem(itemToDelete).unwrap();
+    } catch (error) {
+      logger(error);
+    } finally {
+      hideLoader();
+      setDeleteDialogOpen(false);
+      setItemToDelete(undefined);
+    }
+  };
+
+  const handleEdit = (item: Inventory) => {
+    setSelectedItem(item);
+    setOpenInventoryModel(true);
+  };
+
+  const handleDelete = (id: string) => {
+    setItemToDelete(id);
+    setDeleteDialogOpen(true);
   };
 
   return (
@@ -55,16 +106,35 @@ const InventoryTable = () => {
       </div>
       {/* Table Container */}
       <div className='max-h-full w-full overflow-auto'>
-        <DataTable data={data?.data?.items || []} columns={columns} />
+        <DataTable
+          data={data?.data?.items || []}
+          columns={getInventoryColumns(handleEdit, handleDelete)}
+        />
       </div>
       {openInventoryModel && (
         <ItemModal
           OnClose={() => setOpenInventoryModel(false)}
           isOpen={openInventoryModel}
+          item={selectedItem}
           onSubmit={async (item) => {
-            await addNewItem(item);
+            if (selectedItem) {
+              await updateItem(item);
+            } else {
+              await addNewItem(item);
+            }
             setOpenInventoryModel(false);
+            setSelectedItem(undefined);
           }}
+        />
+      )}
+
+      {deleteDialogOpen && (
+        <AlertDialoagModal
+          isOpen={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          title='Are you sure?'
+          description='This action cannot be undone. This will permanently delete this item from inventory.'
+          onConfirm={handleDeleteItem}
         />
       )}
     </div>

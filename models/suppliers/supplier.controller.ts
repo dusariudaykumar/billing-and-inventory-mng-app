@@ -1,6 +1,8 @@
+import { textToMongoRegExpStatements } from '@/lib/mongo-funs';
 import { ISupplier } from '@/models/suppliers/interface';
 import * as supplierService from '@/models/suppliers/supplier.service';
 import logger from 'lib/logger';
+import _ from 'lodash';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 /**
@@ -11,7 +13,25 @@ export const handleGetSuppliers = async (
   res: NextApiResponse
 ) => {
   try {
-    const suppliers = await supplierService.getAllSuppliers();
+    let baseQuery: object = {};
+    const { page = 1, limit = 10, search } = req.query;
+
+    const searchProps = ['name', 'companyName'];
+
+    if (typeof search === 'string') {
+      const searchQuery = _.chain(searchProps)
+        .map((prop) => textToMongoRegExpStatements(prop, search))
+        .flatten()
+        .filter(Boolean)
+        .value();
+      baseQuery = { $or: searchQuery };
+    }
+
+    const suppliers = await supplierService.getAllSuppliers(
+      baseQuery,
+      Number(limit),
+      Number(page)
+    );
     return res.status(200).json({ success: true, data: suppliers });
   } catch (error) {
     logger(error, 'Error while fetching suppliers');

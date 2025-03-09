@@ -4,7 +4,9 @@ import {
   addNewItemToInventory,
   deleteInventoryItemById,
   getAllItemsFromInventory,
+  getInventoryItemById,
   isInventoryItemExists,
+  updateInventoryItem,
 } from '@/models/inventory/inventory.service';
 import logger from 'lib/logger';
 import _ from 'lodash';
@@ -90,6 +92,50 @@ export const addInventoryItemHandler = async (
     return res.status(500).json({
       success: false,
       message: 'Something went wrong. Please try again.',
+    });
+  }
+};
+
+/**
+ * Handles updating an inventory item by ID.
+ */
+export const updateInventoryItemHandler = async (
+  req: NextApiRequest,
+  res: NextApiResponse
+) => {
+  try {
+    const { id } = req.query;
+    const payload = req.body;
+
+    if (!id || typeof id !== 'string')
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid ID.',
+      });
+
+    const objId = new mongoose.Types.ObjectId(id as string);
+
+    // Check if item exists
+    const existingItem = await getInventoryItemById(objId);
+    if (!existingItem) {
+      return res.status(404).json({
+        success: false,
+        message: 'Item not found.',
+      });
+    }
+
+    // Update the item
+    const updatedItem = await updateInventoryItem(objId, payload);
+    return res.status(200).json({
+      success: true,
+      data: updatedItem,
+      message: 'Item updated successfully.',
+    });
+  } catch (error) {
+    logger(error, 'Inventory API Error:');
+    return res.status(500).json({
+      success: false,
+      message: 'Something went wrong. Please try again',
     });
   }
 };

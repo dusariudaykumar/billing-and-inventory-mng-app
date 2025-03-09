@@ -21,6 +21,14 @@ export const getAllItemsFromInventory = async (
   };
 };
 
+export const getInventoryItemById = async (id: mongoose.Types.ObjectId) => {
+  try {
+    return await Inventory.findById(id);
+  } catch (error: any) {
+    throw new Error(`Error fetching inventory item: ${error?.message}`);
+  }
+};
+
 export const addNewItemToInventory = async (payload: InventoryInterface) => {
   const item = await Inventory.create(payload);
   return item;
@@ -29,6 +37,22 @@ export const addNewItemToInventory = async (payload: InventoryInterface) => {
 export const isInventoryItemExists = async (itemName: string) => {
   const isExists = await Inventory.findOne({ name: itemName });
   return !!isExists;
+};
+
+export const updateInventoryItem = async (
+  id: mongoose.Types.ObjectId,
+  payload: Partial<InventoryInterface>
+) => {
+  try {
+    const updatedItem = await Inventory.findByIdAndUpdate(
+      id,
+      { $set: payload },
+      { new: true, runValidators: true }
+    );
+    return updatedItem;
+  } catch (error: any) {
+    throw new Error(`Error updating inventory item: ${error?.message}`);
+  }
 };
 
 export const deleteInventoryItemById = async (id: mongoose.Types.ObjectId) => {

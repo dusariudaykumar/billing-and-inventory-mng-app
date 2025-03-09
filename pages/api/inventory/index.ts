@@ -3,6 +3,7 @@ import {
   addInventoryItemHandler,
   deleteInventoryItemByIdHandler,
   getInventoryHandler,
+  updateInventoryItemHandler,
 } from '@/models/inventory/inventory.controller';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -14,11 +15,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     case 'POST':
       return addInventoryItemHandler(req, res);
 
+    case 'PUT':
+      return updateInventoryItemHandler(req, res);
+
     case 'DELETE':
       return deleteInventoryItemByIdHandler(req, res);
 
     default:
-      res.setHeader('Allow', ['GET', 'POST', 'DELETE']);
+      res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
       return res.status(405).send({
         success: false,
         message: `Method ${req.method} is not allowed.`,

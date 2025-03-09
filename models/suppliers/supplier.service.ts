@@ -4,8 +4,23 @@ import Supplier from '@/models/suppliers/supplier.modal';
 /**
  * Fetches all suppliers.
  */
-export const getAllSuppliers = async () => {
-  return await Supplier.find({});
+export const getAllSuppliers = async (
+  query: object,
+  limit: number,
+  page: number
+) => {
+  const suppliers = await Supplier.find(query)
+    .limit(limit)
+    .skip((page - 1) * limit)
+    .sort({ createdAt: -1 });
+
+  const count = await Supplier.countDocuments(query);
+  return {
+    suppliers,
+    totalPages: Math.ceil(count / limit),
+    currentPage: page,
+    totalResults: count,
+  };
 };
 
 /**
