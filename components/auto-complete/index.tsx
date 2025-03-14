@@ -79,6 +79,7 @@ type Props<T> = {
   shouldFilter?: boolean;
   filterFunction?: (value: T, searchValue: string) => boolean;
   className?: string;
+  disable?: boolean;
 };
 
 export function AutoComplete<T>({
@@ -97,6 +98,7 @@ export function AutoComplete<T>({
   className,
   onSearchValueChange,
   searchValue,
+  disable = false,
 }: Props<T>) {
   const [open, setOpen] = useState(false);
 
@@ -153,6 +155,7 @@ export function AutoComplete<T>({
                   value={searchValue}
                   onKeyDown={(e) => setOpen(e.key !== 'Escape')}
                   onValueChange={onSearchValueChange}
+                  disabled={disable}
                 >
                   <Input
                     placeholder={placeholder}
@@ -162,7 +165,7 @@ export function AutoComplete<T>({
                 </CommandPrimitive.Input>
               </PopoverTrigger>
               <div className='absolute bottom-0 right-2 top-0 flex h-full max-w-20 items-center gap-2 overflow-hidden'>
-                {selectedValue && searchValue && (
+                {selectedValue && searchValue && !disable && (
                   <Button
                     className='h-6 w-6 rounded-full'
                     variant='ghost'
@@ -177,7 +180,7 @@ export function AutoComplete<T>({
                     <X />
                   </Button>
                 )}
-                <PopoverTrigger asChild>
+                <PopoverTrigger asChild disabled={disable}>
                   <Button
                     className='h-6 w-6 rounded-full'
                     variant='ghost'

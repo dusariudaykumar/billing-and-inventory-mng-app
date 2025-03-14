@@ -36,8 +36,6 @@ export const salesApi = createApi({
       }),
     }),
 
-    //
-
     updateInvoice: builder.mutation<
       UpdateInvoiceAPIResponse,
       { id: string; payload: Partial<CreateInvoicePayload> }
@@ -83,7 +81,7 @@ export const salesApi = createApi({
         }
       },
     }),
-    deleteCustomer: builder.mutation<
+    deleteInvoice: builder.mutation<
       { success: boolean; message: string },
       string
     >({
@@ -96,7 +94,7 @@ export const salesApi = createApi({
         try {
           await queryFulfilled;
           salesApi.util
-            .selectInvalidatedBy(getState(), [{ type: 'invoice' }])
+            .selectInvalidatedBy(getState(), [{ type: 'sales' }])
             .forEach(({ originalArgs, endpointName }) => {
               if (endpointName !== 'getAllSales') return;
 
@@ -126,4 +124,6 @@ export const {
   useCreateInvoiceMutation,
   useGetAllSalesQuery,
   useGetInvoiceQuery,
+  useDeleteInvoiceMutation,
+  useUpdateInvoiceMutation,
 } = salesApi;

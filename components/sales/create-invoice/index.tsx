@@ -25,10 +25,10 @@ import {
   InvoiceStatus,
   PaymentMethods,
 } from '@/interfaces/response.interface';
-import logger from '@/lib/logger';
 import { useGetAllCustomersQuery } from '@/store/services/customer';
 import { useGetAllItemsFromInventoryQuery } from '@/store/services/inventory';
 import { useCreateInvoiceMutation } from '@/store/services/sales';
+import _ from 'lodash';
 import { Loader2, Minus, Plus, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -196,7 +196,6 @@ const CreateInvoice = () => {
           discount: calculations.discount,
           notes: formData.notes,
         };
-        logger(invoiceData, 'Form submitted:');
         await createInvoice(invoiceData).unwrap();
         router.push('/sales');
       }
@@ -208,6 +207,7 @@ const CreateInvoice = () => {
       formData,
       selectedProducts,
       validateForm,
+      router,
     ]
   );
 
@@ -245,27 +245,28 @@ const CreateInvoice = () => {
   }, [selectedProducts, inventory?.data?.items]);
 
   useEffect(() => {
-    // Debug: log available inventory items.
-    console.log('Available inventory items:', inventoryItems);
-  }, [inventoryItems]);
-
-  useEffect(() => {
     let beforeDiscountTotalAmount = 0;
-    let afterDiscountTotalAmount = 0;
 
     selectedProducts.forEach((product) => {
       beforeDiscountTotalAmount +=
         product.sellingPrice * product.invoiceQuantity;
-      afterDiscountTotalAmount +=
-        beforeDiscountTotalAmount - calculations.discount;
     });
 
     setCalculations((prev) => ({
       ...prev,
       beforeDiscountTotalAmount,
-      afterDiscountTotalAmount,
+      afterDiscountTotalAmount: beforeDiscountTotalAmount - prev.discount,
     }));
   }, [calculations.discount, selectedProducts]);
+
+  useEffect(() => {
+    if (formData.status === InvoiceStatus.PAID) {
+      setFormData((prev) => ({
+        ...prev,
+        customerPaid: calculations.afterDiscountTotalAmount,
+      }));
+    }
+  }, [formData.status, calculations.afterDiscountTotalAmount]);
 
   return (
     <div className='flex h-full w-full flex-1 flex-col space-y-8 overflow-auto p-8'>
@@ -417,13 +418,13 @@ const CreateInvoice = () => {
               onSelectedValueChange={(option) => {
                 if (!option) return;
 
-                const {
-                  createdAt,
-                  updatedAt,
-                  purchasePrice,
-                  quantity,
-                  ...rest
-                } = option;
+                const rest = _.omit(option, [
+                  'createdAt',
+                  'updatedAt',
+                  'purchasePrice',
+                  'quantity',
+                ]);
+
                 setSelectedProducts((prev) => [
                   ...prev,
                   {
