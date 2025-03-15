@@ -22,6 +22,11 @@ const customerSchema = new mongoose.Schema<ICustomerDoc, ICustomerModel>(
       type: Object,
       required: false,
     },
+    isActive: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
   },
   {
     timestamps: true,

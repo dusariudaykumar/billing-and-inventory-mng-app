@@ -11,6 +11,7 @@ export const getAllSales = async (query: any, limit: number, page: number) => {
     const skip = (page - 1) * limit;
 
     const pipeline: mongoose.PipelineStage[] = [
+      { $match: { isActive: true } },
       {
         $lookup: {
           from: 'customers',
@@ -117,5 +118,5 @@ export const getSalesById = async (id: mongoose.Types.ObjectId) => {
  * Deletes an invoice by ID.
  */
 export const deleteInvoiceById = async (id: mongoose.Types.ObjectId) => {
-  return await Sales.findByIdAndDelete(id);
+  return await Sales.findByIdAndUpdate(id, { $set: { isActive: false } });
 };

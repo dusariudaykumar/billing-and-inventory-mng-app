@@ -9,7 +9,7 @@ export const getAllCustomers = async (
   limit: number,
   page: number
 ) => {
-  const customers = await Customer.find(query)
+  const customers = await Customer.find({ isActive: true, ...query })
     .limit(limit)
     .skip((page - 1) * limit)
     .sort({ createdAt: -1 });
@@ -62,5 +62,5 @@ export const updateCustomer = async (
  * Deletes a customer by ID.
  */
 export const deleteCustomer = async (id: string) => {
-  return await Customer.findByIdAndDelete(id);
+  return await Customer.findByIdAndUpdate(id, { $set: { isActive: false } });
 };

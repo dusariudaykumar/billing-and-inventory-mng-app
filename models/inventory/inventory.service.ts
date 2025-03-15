@@ -7,7 +7,7 @@ export const getAllItemsFromInventory = async (
   page: number,
   limit: number
 ) => {
-  const items = await Inventory.find({ ...query })
+  const items = await Inventory.find({ isActive: true, ...query })
     .limit(limit * 1)
     .skip((page - 1) * limit)
     .sort({ createdAt: -1 });
@@ -57,7 +57,7 @@ export const updateInventoryItem = async (
 
 export const deleteInventoryItemById = async (id: mongoose.Types.ObjectId) => {
   try {
-    await Inventory.deleteOne({ _id: id });
+    await Inventory.findByIdAndUpdate(id, { $set: { isActive: false } });
   } catch (error: any) {
     throw new Error(`Error deleting invoice: ${error?.message}`);
   }

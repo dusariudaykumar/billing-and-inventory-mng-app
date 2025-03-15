@@ -6,6 +6,7 @@ export interface Inventory {
   quantity: number;
   units: string;
   purchasePrice: number;
+  isActive: boolean;
 }
 
 export interface InventoryDoc extends Inventory, Document {}

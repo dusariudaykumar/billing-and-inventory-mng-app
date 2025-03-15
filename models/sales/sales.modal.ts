@@ -56,6 +56,11 @@ const salesSchema = new mongoose.Schema<ISalesDoc, ISalesModel>(
       type: String,
       required: false,
     },
+    isActive: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
   },
   {
     timestamps: true,

@@ -9,7 +9,7 @@ export const getAllSuppliers = async (
   limit: number,
   page: number
 ) => {
-  const suppliers = await Supplier.find(query)
+  const suppliers = await Supplier.find({ isActive: true, ...query })
     .limit(limit)
     .skip((page - 1) * limit)
     .sort({ createdAt: -1 });
@@ -54,5 +54,5 @@ export const updateSupplier = async (
  * Deletes a supplier by ID.
  */
 export const deleteSupplier = async (id: string) => {
-  return await Supplier.findByIdAndDelete(id);
+  return await Supplier.findByIdAndUpdate(id, { $set: { isActive: false } });
 };

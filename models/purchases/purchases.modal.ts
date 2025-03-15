@@ -31,6 +31,11 @@ const purchasesSchema = new mongoose.Schema<IPurchasesDoc, IPurchasesModel>(
       type: Number,
       required: true,
     },
+    isActive: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
   },
   { timestamps: true }
 );

@@ -5,6 +5,7 @@ export interface ICustomer {
   companyName: string;
   contactDetails: ContactDetails;
   customerID: string;
+  isActive: boolean;
 }
 
 export interface ContactDetails {

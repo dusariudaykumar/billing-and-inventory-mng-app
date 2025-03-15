@@ -17,6 +17,11 @@ const supplierSchema = new mongoose.Schema<ISupplierDoc, ISupplierModal>(
     contactDetails: {
       type: Object,
     },
+    isActive: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
   },
   {
     timestamps: true,

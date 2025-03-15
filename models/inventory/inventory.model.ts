@@ -26,6 +26,11 @@ const inventorySchema = new mongoose.Schema<InventoryDoc, InventoryModel>(
       type: String,
       required: true,
     },
+    isActive: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
   },
   {
     timestamps: true,

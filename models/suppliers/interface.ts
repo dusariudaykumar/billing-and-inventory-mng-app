@@ -4,6 +4,7 @@ export interface ISupplier {
   name: string;
   companyName: string;
   contactDetails: ContactDetails;
+  isActive: boolean;
 }
 export interface ContactDetails {
   phone: string;

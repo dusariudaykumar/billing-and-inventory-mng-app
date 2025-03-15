@@ -13,7 +13,7 @@ export const createPurchase = async (payload: IPurchases) => {
  */
 export const getAllPurchases = async (limit: number, page: number) => {
   const skip = (page - 1) * limit;
-  const purchases = await Purchases.find({})
+  const purchases = await Purchases.find({ isActive: true })
     .limit(limit)
     .skip(skip)
     .sort({ createdAt: -1 });
