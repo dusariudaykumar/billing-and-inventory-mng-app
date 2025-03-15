@@ -1,7 +1,7 @@
 'use client';
 
 import { CirclePlus } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import logger from '@/lib/logger';
 
@@ -18,7 +18,9 @@ import {
 } from '@/store/services/customer';
 
 import AlertDialoagModal from '@/components/alert-dailog-modal';
+import { SearchBar } from '@/components/searchbar';
 import { useLoading } from '@/context/loader-provider';
+import { useDebounce } from '@/hooks/use-debounce';
 import {
   CreateCustomerPayload,
   Customer,
@@ -26,11 +28,12 @@ import {
 
 const CustomerTable = () => {
   const { hideLoader, showLoader } = useLoading();
-  const { data } = useGetAllCustomersQuery({});
   const [createCustomer] = useCreateNewCustomerMutation();
   const [updateCustomer] = useUpdateCustomerMutation();
   const [deleteCustomer] = useDeleteCustomerMutation();
 
+  const [searchValue, setSearchValue] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
   const [openCustomerModel, setOpenCustomerModel] = useState<boolean>(false);
   const [customerToDelete, setCustomerToDelete] = useState<string | undefined>(
@@ -39,6 +42,16 @@ const CustomerTable = () => {
   const [selectedCustomer, setSelectedCustomer] = useState<
     Customer | undefined
   >();
+
+  const debouncedSearchValue = useDebounce(searchValue);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchValue]);
+
+  const { data } = useGetAllCustomersQuery({
+    search: debouncedSearchValue,
+    page: currentPage,
+  });
 
   const createNewCustomer = async (newCustomer: CreateCustomerPayload) => {
     try {
@@ -105,10 +118,26 @@ const CustomerTable = () => {
       </div>
 
       {/* Table Container */}
-      <div className='max-h-full w-full overflow-auto'>
-        <DataTable
+      <div className='flex max-h-full w-full flex-col overflow-auto rounded-t-md'>
+        <div className=' border border-b-0 p-2'>
+          <SearchBar
+            onChange={(value) => setSearchValue(value)}
+            value={searchValue}
+            placeholderText='Search'
+            className='w-full p-2'
+            containerClass='max-w-[300px] w-full'
+          />
+        </div>
+
+        <DataTable<Customer>
           data={data?.data?.customers || []}
           columns={getCustomerColumns(handleEdit, handleDelete)}
+          containerClassname='rounded-t-none'
+          onPaginationChange={(page) => setCurrentPage(page)}
+          totalPages={data?.data?.totalPages || 0}
+          currentPage={currentPage}
+          getRowId={(row) => row._id}
+          totalCount={data?.data?.totalResults || 0}
         />
       </div>
       {openCustomerModel && (

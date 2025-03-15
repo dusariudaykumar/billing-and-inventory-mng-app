@@ -6,7 +6,10 @@ import { CirclePlus } from 'lucide-react';
 
 import AlertDialoagModal from '@/components/alert-dailog-modal';
 import { getSalesColumns } from '@/components/sales/sales-table/columns';
+import { SearchBar } from '@/components/searchbar';
 import { useLoading } from '@/context/loader-provider';
+import { useDebounce } from '@/hooks/use-debounce';
+import { Sale } from '@/interfaces/response.interface';
 import logger from '@/lib/logger';
 import {
   useDeleteInvoiceMutation,
@@ -14,17 +17,28 @@ import {
 } from '@/store/services/sales';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const SalesTable = () => {
   const router = useRouter();
 
   const { hideLoader, showLoader } = useLoading();
-  const { data } = useGetAllSalesQuery({});
   const [deleteInvoice] = useDeleteInvoiceMutation();
 
+  const [searchValue, setSearchValue] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
   const [invoiceToDelete, setInvoiceToDelete] = useState<string | undefined>();
+
+  const debouncedSearchValue = useDebounce(searchValue);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchValue]);
+
+  const { data } = useGetAllSalesQuery({
+    search: debouncedSearchValue,
+    page: currentPage,
+  });
 
   const handleDeleteInvoice = async () => {
     if (!invoiceToDelete) return;
@@ -64,9 +78,24 @@ const SalesTable = () => {
 
       {/* Table Container */}
       <div className='max-h-full w-full overflow-auto'>
-        <DataTable
+        <div className=' border border-b-0 p-2'>
+          <SearchBar
+            onChange={(value) => setSearchValue(value)}
+            value={searchValue}
+            placeholderText='Search'
+            className='w-full p-2'
+            containerClass='max-w-[300px] w-full'
+          />
+        </div>
+        <DataTable<Sale>
           data={data?.data?.sales || []}
           columns={getSalesColumns(handleEdit, handleDelete)}
+          containerClassname='rounded-t-none'
+          onPaginationChange={(page) => setCurrentPage(page)}
+          totalPages={data?.data?.totalPages || 0}
+          currentPage={currentPage}
+          getRowId={(row) => row._id}
+          totalCount={data?.data?.totalResults || 0}
         />
       </div>
 

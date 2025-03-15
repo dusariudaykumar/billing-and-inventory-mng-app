@@ -1,11 +1,13 @@
 'use client';
 
 import AlertDialoagModal from '@/components/alert-dailog-modal';
+import { SearchBar } from '@/components/searchbar';
 import { getSupplierCoulmns } from '@/components/supplier/columns';
 import { SupplierModel } from '@/components/supplier/supplier-model';
 import { DataTable } from '@/components/table/data-table';
 import { Button } from '@/components/ui/button';
 import { useLoading } from '@/context/loader-provider';
+import { useDebounce } from '@/hooks/use-debounce';
 import {
   CreateSupplierPayload,
   Supplier,
@@ -18,15 +20,16 @@ import {
   useUpdateSupplierMutation,
 } from '@/store/services/supplier';
 import { CirclePlus } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const SupplierTable = () => {
   const { hideLoader, showLoader } = useLoading();
-  const { data } = useGetAllSuppliersQuery({ limit: 30, page: 1 });
   const [createSupplier] = useCreateNewSupplierMutation();
   const [updateSupplier] = useUpdateSupplierMutation();
   const [deleteSupplier] = useDeleteSupplierMutation();
 
+  const [searchValue, setSearchValue] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const [openSupplierModel, setOpenSupplierModel] = useState<boolean>(false);
   const [selectedSupplier, setSelectedSupplier] = useState<
     Supplier | undefined
@@ -35,6 +38,16 @@ const SupplierTable = () => {
   const [supplierToDelete, setSupplierToDelete] = useState<
     string | undefined
   >();
+
+  const debouncedSearchValue = useDebounce(searchValue);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchValue]);
+
+  const { data } = useGetAllSuppliersQuery({
+    page: currentPage,
+    search: debouncedSearchValue,
+  });
 
   const createNewSupplier = async (newCustomer: CreateSupplierPayload) => {
     try {
@@ -101,9 +114,25 @@ const SupplierTable = () => {
 
       {/* Table Container */}
       <div className='max-h-full w-full overflow-auto'>
-        <DataTable
+        <div className=' border border-b-0 p-2'>
+          <SearchBar
+            onChange={(value) => setSearchValue(value)}
+            value={searchValue}
+            placeholderText='Search'
+            className='w-full p-2'
+            containerClass='max-w-[300px] w-full'
+          />
+        </div>
+
+        <DataTable<Supplier>
           data={data?.data?.suppliers || []}
           columns={getSupplierCoulmns(handleEdit, handleDelete)}
+          containerClassname='rounded-t-none'
+          onPaginationChange={(page) => setCurrentPage(page)}
+          totalPages={data?.data?.totalPages || 0}
+          currentPage={currentPage}
+          getRowId={(row) => row._id}
+          totalCount={data?.data?.totalResults || 0}
         />
       </div>
       {openSupplierModel && (
