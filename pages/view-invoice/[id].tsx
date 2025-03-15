@@ -1,4 +1,4 @@
-import InvoiceTemplate from '@/components/sales/view-invoice/new-template';
+import InvoiceTemplate from '@/components/sales/view-invoice/invoice-template';
 import Layout from 'components/layout';
 import Seo from 'components/seo';
 
@@ -7,6 +7,7 @@ export default function Page() {
     <Layout>
       <Seo />
       <InvoiceTemplate />
+      {/* <InvoiceTemplate /> */}
     </Layout>
   );
 }

@@ -1,0 +1,14 @@
+14/03/25
+
+P0:
+- Update the sales schema to store the customer info instead of storing cutomerId. so the invoice won't break when the cutomer is deleted. - done
+- Added search and pagination feature for all the tables. - done
+- Update invoice template. - done
+- Add print invoice feature. - done
+- Added view customer feature. [Shown customer data, Sales history, Stats: total business, due amount].
+
+
+
+P1:
+- Add purchases table.
+- Plan the dashboard feature.
