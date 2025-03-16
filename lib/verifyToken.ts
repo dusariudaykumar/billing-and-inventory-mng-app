@@ -8,7 +8,12 @@ import jwt from 'jsonwebtoken';
  */
 export const verifyToken = (token: string) => {
   try {
-    return jwt.verify(token, process.env.JWT_SECRET as string) as {
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      throw new Error('JWT_SECRET environment variable is not set');
+    }
+
+    return jwt.verify(token, secret as string) as {
       sub: string;
     };
   } catch (error) {

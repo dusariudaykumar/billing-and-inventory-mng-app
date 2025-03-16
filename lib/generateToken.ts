@@ -7,7 +7,12 @@ import mongoose from 'mongoose';
  * @returns JWT Token
  */
 export const generateJWTToken = (userId: mongoose.Types.ObjectId) => {
-  return jwt.sign({ sub: userId }, process.env.JWT_SECRET as string, {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET environment variable is not set');
+  }
+
+  return jwt.sign({ sub: userId }, secret as string, {
     expiresIn: '7d', // Token expires in 7 days
   });
 };
