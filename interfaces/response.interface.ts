@@ -58,6 +58,36 @@ export interface CreateCustomerPayload
 export type CreateCutomerAPIResponse = IResponse<Customer>;
 
 export type UpdateCustomerAPIResponse = IResponse<Customer>;
+
+interface CustomerDetails {
+  id: string;
+  name: string;
+  companyName: string;
+  email: string;
+  phone: string;
+  address: string;
+  status: string;
+  customerSince: string;
+  stats: {
+    totalBusiness: number;
+    dueAmount: number;
+    totalInvoices: number;
+    avgOrderValue: number;
+  };
+  recentSales: Array<{
+    id: string;
+    invoiceNumber: number;
+    date: Date;
+    amount: number;
+    customerPaid: number;
+    dueAmount: number;
+    dueDate: Date;
+    status: 'Paid' | 'Unpaid' | 'Partial' | 'Overdue';
+  }>;
+}
+
+export type GetCustomerDetailsAPIResponse = IResponse<CustomerDetails>;
+
 // Suppliers
 
 export interface Supplier {

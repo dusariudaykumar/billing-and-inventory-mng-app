@@ -12,14 +12,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import {
-  Box,
-  IndianRupee,
-  LayoutDashboard,
-  ScrollText,
-  Truck,
-  Users,
-} from 'lucide-react';
+import { Box, IndianRupee, LayoutDashboard, Truck, Users } from 'lucide-react';
 import * as React from 'react';
 
 import { useAppSelector } from '@/store/hooks';
@@ -61,11 +54,11 @@ const data = {
       icon: Truck,
     },
 
-    {
-      name: 'Purchases',
-      url: '#',
-      icon: ScrollText,
-    },
+    // {
+    //   name: 'Purchases',
+    //   url: '#',
+    //   icon: ScrollText,
+    // },
   ],
 };
 

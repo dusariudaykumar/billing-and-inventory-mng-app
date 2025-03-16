@@ -64,7 +64,7 @@ const SalesTable = () => {
     setDeleteDialogOpen(true);
   };
   return (
-    <div className='flex h-full w-full flex-1 flex-col space-y-8 p-8'>
+    <div className='flex h-full w-full flex-1 flex-col space-y-8 p-8 '>
       <div className='flex items-center justify-between'>
         <div className='flex w-full items-center justify-between'>
           <h2 className='text-2xl font-bold tracking-tight'>Sales</h2>

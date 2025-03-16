@@ -1,4 +1,5 @@
 import { textToMongoRegExpStatements } from '@/lib/mongo-funs';
+import Sales from '@/models/sales/sales.modal';
 import logger from 'lib/logger';
 import _ from 'lodash';
 import {
@@ -10,6 +11,7 @@ import {
   updateCustomer,
 } from 'models/customers/customer.service';
 import { ICustomer } from 'models/customers/interface';
+import mongoose from 'mongoose';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 /**
@@ -81,6 +83,107 @@ export const createCustomerHandler = async (
     return res
       .status(400)
       .send({ success: false, message: 'Customer already exists' });
+  } catch (error) {
+    logger(error);
+    return res.status(500).json({
+      success: false,
+      message: 'Something went wrong. Please try again.',
+    });
+  }
+};
+
+/**
+ * Handles fetching detailed customer information including sales history and stats
+ */
+export const getCustomerDetailsHandler = async (
+  req: NextApiRequest,
+  res: NextApiResponse
+) => {
+  try {
+    const { id } = req.query;
+
+    if (!id) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Customer ID is required' });
+    }
+
+    // Get customer basic information
+    const customer = await getCustomerById(id as string);
+    if (!customer) {
+      return res
+        .status(404)
+        .json({ success: false, message: 'Customer not found' });
+    }
+
+    // Get customer's sales history
+    const sales = await Sales.find({
+      customerId: new mongoose.Types.ObjectId(id as string),
+      isActive: true,
+    })
+      .sort({ invoiceDate: -1 })
+      .limit(10); // Get last 10 sales
+
+    // Calculate customer statistics
+    const allSales = await Sales.find({
+      customerId: new mongoose.Types.ObjectId(id as string),
+      isActive: true,
+    });
+
+    const stats = {
+      totalBusiness: allSales.reduce((sum, sale) => sum + sale.totalAmount, 0),
+      dueAmount: allSales.reduce((sum, sale) => sum + sale.dueAmount, 0),
+      totalInvoices: allSales.length,
+      avgOrderValue:
+        allSales.length > 0
+          ? allSales.reduce((sum, sale) => sum + sale.totalAmount, 0) /
+            allSales.length
+          : 0,
+    };
+
+    // Transform sales data for frontend
+    const recentSales = sales.map((sale) => ({
+      id: sale._id,
+      invoiceNumber: sale.invoiceNumber,
+      date: sale.invoiceDate,
+      amount: sale.totalAmount,
+      customerPaid: sale.customerPaid,
+      dueAmount: sale.dueAmount,
+      dueDate: new Date(sale.invoiceDate.getTime() + 15 * 24 * 60 * 60 * 1000),
+      status:
+        sale.dueAmount === 0
+          ? 'Paid'
+          : sale.dueAmount === sale.totalAmount
+          ? 'Unpaid'
+          : sale.dueAmount > 0
+          ? 'Partial'
+          : 'Overdue',
+    }));
+
+    // Transform customer data for frontend
+    const customerData = {
+      id: customer._id,
+      name: customer.name,
+      companyName: customer?.companyName || '',
+      email: customer.contactDetails?.email || '',
+      phone: customer.contactDetails?.phone || '',
+      address: customer.contactDetails?.address || '',
+      status: customer.isActive ? 'Active' : 'Inactive',
+      customerSince: ((customer as any)?.createdAt as Date).toLocaleDateString(
+        'en-US',
+        {
+          month: 'long',
+          year: 'numeric',
+        }
+      ),
+      stats,
+      recentSales,
+    };
+
+    return res.status(200).json({
+      success: true,
+      data: customerData,
+    });
   } catch (error) {
     logger(error);
     return res.status(500).json({

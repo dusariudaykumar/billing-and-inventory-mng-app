@@ -9,6 +9,7 @@ import {
   CreateCustomerPayload,
   CreateCutomerAPIResponse,
   GetAllCustomersAPIResponse,
+  GetCustomerDetailsAPIResponse,
   UpdateCustomerAPIResponse,
 } from '@/interfaces/response.interface';
 import logger from '@/lib/logger';
@@ -27,6 +28,9 @@ export const customerApi = createApi({
         method: 'GET',
       }),
       providesTags: ['customers'],
+    }),
+    getCustomerDetails: builder.query<GetCustomerDetailsAPIResponse, string>({
+      query: (id) => `/customers?id=${id}`,
     }),
     createNewCustomer: builder.mutation<
       CreateCutomerAPIResponse,
@@ -155,6 +159,7 @@ export const customerApi = createApi({
 
 export const {
   useGetAllCustomersQuery,
+  useGetCustomerDetailsQuery,
   useCreateNewCustomerMutation,
   useDeleteCustomerMutation,
   useUpdateCustomerMutation,

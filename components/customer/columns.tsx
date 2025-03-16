@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Customer } from '@/interfaces/response.interface';
 import { Edit, MoreHorizontalIcon, Trash } from 'lucide-react';
+import Link from 'next/link';
 
 export const getCustomerColumns = (
   handleEdit: (customer: Customer) => void,
@@ -47,9 +48,16 @@ export const getCustomerColumns = (
     {
       accessorKey: 'customerID',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title='# CustomerID' />
+        <DataTableColumnHeader column={column} title='# Customer' />
       ),
-      cell: ({ row }) => <div>#{row.getValue('customerID')}</div>,
+      cell: ({ row }) => (
+        <Link
+          href={`/customer-details/${row.original._id}`}
+          className='text-sm text-blue-600 underline underline-offset-2'
+        >
+          #{row.getValue('customerID')}
+        </Link>
+      ),
       enableSorting: true,
       enableHiding: true,
     },

@@ -2,6 +2,7 @@ import { withAuth } from '@/middleware/with-auth-api-middleware';
 import {
   createCustomerHandler,
   deleteCustomerHandler,
+  getCustomerDetailsHandler,
   getCustomersHandler,
   updateCustomerHandler,
 } from '@/models/customers/customer.controller';
@@ -10,6 +11,9 @@ import { NextApiRequest, NextApiResponse } from 'next';
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   switch (req.method) {
     case 'GET':
+      if (req.query.id) {
+        return getCustomerDetailsHandler(req, res);
+      }
       return getCustomersHandler(req, res);
 
     case 'POST':

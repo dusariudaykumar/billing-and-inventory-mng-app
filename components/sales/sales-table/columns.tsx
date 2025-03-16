@@ -1,8 +1,6 @@
 'use client';
 
 import { DataTableColumnHeader } from '@/components/table/data-table-column-header';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -12,7 +10,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { InvoiceStatus, Sale } from '@/interfaces/response.interface';
-import { cn } from '@/lib/utils';
 import { ColumnDef } from '@tanstack/react-table';
 import { Edit, MoreHorizontal, Trash } from 'lucide-react';
 import Link from 'next/link';
@@ -47,27 +44,30 @@ export const getSalesColumns = (
       enableHiding: false,
     },
     {
+      accessorKey: 'invoiceNumber',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title='# Invoice' />
+      ),
+      cell: ({ row }) => (
+        <Link
+          href={`/view-invoice/${row.original._id}`}
+          className='text-sm text-blue-600 underline underline-offset-2'
+        >
+          0{row.getValue('invoiceNumber')}
+        </Link>
+      ),
+      enableSorting: true,
+      enableHiding: true,
+    },
+    {
       accessorKey: 'customerInfo',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title='Customer' />
       ),
       cell: ({ row }) => {
-        const {
-          customerInfo: { name },
-          _id,
-        } = row.original;
         return (
           <div className='flex items-center gap-2'>
-            <Avatar>
-              <AvatarFallback>
-                {name?.slice(0, 2)?.toLocaleUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <Link href={`/view-invoice/${_id}`}>
-              <p className='text-sm text-blue-600 underline underline-offset-2'>
-                {name}
-              </p>
-            </Link>
+            <p className='text-sm'>{row.original?.customerInfo?.name}</p>
           </div>
         );
       },
@@ -108,14 +108,18 @@ export const getSalesColumns = (
       ),
       cell: ({ row }) => {
         const status = row.getValue('status');
-        const color =
-          status === InvoiceStatus.PAID
-            ? 'bg-green-500 hover:bg-green-500'
-            : status === InvoiceStatus.PARTIALLY_PAID
-            ? 'bg-blue-500 hover:bg-blue-500'
-            : 'bg-red-500 hover:bg-red-500';
         return (
-          <Badge className={cn(color, 'font-medium')}>{status as string}</Badge>
+          <span
+            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+              status === InvoiceStatus.PAID
+                ? 'bg-green-100 text-green-800'
+                : status === InvoiceStatus.PARTIALLY_PAID
+                ? 'bg-yellow-100 text-yellow-800'
+                : 'bg-red-100 text-red-800'
+            }`}
+          >
+            {status as string}
+          </span>
         );
       },
       enableSorting: true,
