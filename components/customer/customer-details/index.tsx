@@ -44,7 +44,15 @@ const CustomerDeatils = () => {
   }
 
   return (
-    <div className='min-h-screen bg-gray-50'>
+    <div className='flex h-full w-full flex-1 flex-col space-y-8 overflow-auto p-8'>
+      <div className='flex items-center justify-between'>
+        <h2 className='text-2xl font-bold tracking-tight'>Customer</h2>
+        <Button variant='outline' onClick={() => router.push('/customers')}>
+          <ArrowLeft className='mr-2 h-4 w-4' />
+          Back to Customers
+        </Button>
+      </div>
+
       <div className='container mx-auto px-4 py-8'>
         {/* Customer Profile Header */}
         <Card className='mb-8'>
