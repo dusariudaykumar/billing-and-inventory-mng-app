@@ -211,11 +211,11 @@ const CustomerDeatils = () => {
                     <div className='font-medium text-gray-900'>
                       {currencyFormat(sale.amount)}
                     </div>
-                    <div className='font-medium text-gray-900'>
-                      {currencyFormat(sale.dueAmount)}
-                    </div>
                     <div className='text-gray-600'>
                       {currencyFormat(sale.customerPaid)}
+                    </div>
+                    <div className='font-medium text-gray-900'>
+                      {currencyFormat(sale.dueAmount)}
                     </div>
                     <div>
                       <span
