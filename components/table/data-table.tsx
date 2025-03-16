@@ -61,7 +61,7 @@ export const DataTable = <T extends object>({
   currentPage = 0,
   totalPages,
   totalCount = 0,
-  enableRowSelection = false,
+  enableRowSelection = true,
   getRowId,
   className,
 }: Props<T>) => {
