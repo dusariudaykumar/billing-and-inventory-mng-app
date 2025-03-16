@@ -59,13 +59,13 @@ const InvoiceTemplate: React.FC = () => {
           <header className='mb-6 flex flex-col items-center justify-center'>
             <h6 className='font-bold underline'>ESTIMATE</h6>
             {/* Logo placeholder */}
-            <div className='flex items-center gap-4'>
+            <div className='flex items-center gap-6'>
               <Image src='/logo.png' alt='SRD Logo' width={84} height={20} />
-              <h3>SRD</h3>
+              <h2 className='font-serif text-5xl'>SRD</h2>
               <Image
                 src='/rockdrills.jpg'
                 alt='SRD Logo'
-                width={84}
+                width={74}
                 height={20}
               />
             </div>
@@ -77,7 +77,9 @@ const InvoiceTemplate: React.FC = () => {
             <div className='flex items-center justify-between'>
               <div className='flex items-center'>
                 <span className='pr-2'>No.</span>
-                <span>0{data?.invoiceNumber || '---'}</span>
+                <span className='text-sm font-semibold text-blue-600'>
+                  0{data?.invoiceNumber || '---'}
+                </span>
               </div>
               <div>
                 <span className='pr-2'>Date:</span>

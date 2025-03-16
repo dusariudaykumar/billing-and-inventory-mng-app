@@ -200,7 +200,7 @@ const CustomerDeatils = () => {
                     className='grid grid-cols-6 border-b px-6 py-4 text-sm hover:bg-gray-50'
                   >
                     <Link
-                      href={`/view-invoice/${data.id}`}
+                      href={`/view-invoice/${sale.id}`}
                       className='font-medium text-blue-600 underline underline-offset-2'
                     >
                       0{sale.invoiceNumber}
