@@ -2,6 +2,11 @@
 
 import { AutoComplete } from '@/components/auto-complete';
 import { CalendarForm } from '@/components/calendar';
+import {
+  CustomServiceFormData,
+  CustomServiceModal,
+} from '@/components/sales/custom-service-modal';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -25,15 +30,16 @@ import {
   InvoiceStatus,
   PaymentMethods,
 } from '@/interfaces/response.interface';
+import { cn } from '@/lib/utils';
 import { useGetAllCustomersQuery } from '@/store/services/customer';
 import { useGetAllItemsFromInventoryQuery } from '@/store/services/inventory';
 import { useCreateInvoiceMutation } from '@/store/services/sales';
 import _ from 'lodash';
-import { Loader2, Minus, Plus, Trash2 } from 'lucide-react';
+import { Loader2, Minus, Plus, Settings, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-// Form error types remain unchanged.
+// Form errors type
 interface FormErrors {
   customerId?: string;
   invoiceDate?: string;
@@ -42,19 +48,16 @@ interface FormErrors {
   invoiceNumber?: string;
 }
 
-// NOTE:
-// - The Inventory response's "quantity" indicates available stock.
-// - For the invoice, we use "invoiceQuantity" for the quantity being ordered,
-//   and "availableQuantity" to keep track of stock.
+// Interface for selected items includes inventory items and custom services
 interface SelectedItems
   extends Omit<
     Inventory,
     'updatedAt' | 'createdAt' | 'purchasePrice' | 'quantity'
   > {
-  // availableQuantity: number;
   invoiceQuantity: number;
   discount: number;
   amount: number;
+  isCustomService?: boolean;
 }
 
 interface FormData {
@@ -94,6 +97,11 @@ const CreateInvoice = () => {
     beforeDiscountTotalAmount: 0,
     discount: 0,
   });
+
+  // Custom service modal state
+  const [isCustomServiceModalOpen, setIsCustomServiceModalOpen] =
+    useState(false);
+
   const [customerParams, setCustomerParams] = useState<BasicQueryParams>({
     limit: 10,
     page: 1,
@@ -111,28 +119,20 @@ const CreateInvoice = () => {
   const debouncedCustomerSearch = useDebounce(customerParams.search);
   const debouncedInventoryItemSearch = useDebounce(inventoryItemsParams.search);
 
-  // Fetch customers and inventory items.
-  const {
-    data: customers,
-    error: customersError,
-    // isLoading: isLoadingCustomers,
-  } = useGetAllCustomersQuery({
+  const { data: customers, error: customersError } = useGetAllCustomersQuery({
     limit: customerParams.limit,
     page: customerParams.page,
     search: debouncedCustomerSearch,
   });
 
-  const {
-    data: inventory,
-    error: inventoryError,
-    // isLoading: isLoadingInventory,
-  } = useGetAllItemsFromInventoryQuery({
-    limit: inventoryItemsParams.limit,
-    page: inventoryItemsParams.page,
-    search: debouncedInventoryItemSearch,
-  });
+  const { data: inventory, error: inventoryError } =
+    useGetAllItemsFromInventoryQuery({
+      limit: inventoryItemsParams.limit,
+      page: inventoryItemsParams.page,
+      search: debouncedInventoryItemSearch,
+    });
 
-  // Validate required fields and at least one product.
+  // Validate required fields and at least one product
   const validateForm = useCallback((): boolean => {
     const newErrors: FormErrors = {};
 
@@ -155,7 +155,7 @@ const CreateInvoice = () => {
     return Object.keys(newErrors).length === 0;
   }, [formData, selectedProducts]);
 
-  // Update form data and clear errors for that field.
+  // Update form data and clear errors for that field
   const handleInputChange = useCallback(
     (field: keyof FormData, value: string | number | Date) => {
       setFormData((prev) => ({
@@ -172,16 +172,17 @@ const CreateInvoice = () => {
     [errors]
   );
 
-  // When submitting, merge selected products into form data.
+  // When submitting, merge selected products into form data
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
       if (validateForm()) {
         const items: Item[] = selectedProducts.map(
-          ({ _id, invoiceQuantity, __v, ...rest }) => ({
+          ({ _id, invoiceQuantity, __v, isCustomService, ...rest }) => ({
             ...rest,
             itemId: _id,
             quantity: invoiceQuantity,
+            isCustomService: isCustomService || false,
           })
         );
 
@@ -233,7 +234,29 @@ const CreateInvoice = () => {
     setSelectedProducts((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
-  // Filter inventory items that haven't already been selected.
+  // Add custom service
+  const handleAddCustomService = useCallback(
+    (serviceData: CustomServiceFormData) => {
+      const customId = `custom-${Date.now()}`;
+      setSelectedProducts((prev) => [
+        ...prev,
+        {
+          _id: customId,
+          name: serviceData.name,
+          sellingPrice: serviceData.sellingPrice,
+          units: serviceData.units || '',
+          invoiceQuantity: serviceData?.quantity || 0,
+          discount: 0,
+          amount: serviceData.sellingPrice,
+          __v: 0,
+          isCustomService: true,
+        },
+      ]);
+    },
+    []
+  );
+
+  // Filter inventory items that haven't already been selected
   const inventoryItems = useMemo(() => {
     const items = inventory?.data?.items ?? [];
     if (selectedProducts.length === 0) return items;
@@ -246,8 +269,9 @@ const CreateInvoice = () => {
     let beforeDiscountTotalAmount = 0;
 
     selectedProducts.forEach((product) => {
-      beforeDiscountTotalAmount +=
-        product.sellingPrice * product.invoiceQuantity;
+      beforeDiscountTotalAmount += product.isCustomService
+        ? product.sellingPrice
+        : product.sellingPrice * product.invoiceQuantity;
     });
 
     setCalculations((prev) => ({
@@ -404,9 +428,20 @@ const CreateInvoice = () => {
 
         {/* Products Section */}
         <div className='space-y-2'>
-          <Label>
-            Products <span className='ml-1 text-red-500'>*</span>
-          </Label>
+          <div className='flex items-center justify-between'>
+            <Label>
+              Products <span className='ml-1 text-red-500'>*</span>
+            </Label>
+            <Button
+              type='button'
+              variant='secondary'
+              onClick={() => setIsCustomServiceModalOpen(true)}
+            >
+              <Settings className='mr-2 h-4 w-4' />
+              Add Custom Service
+            </Button>
+          </div>
+
           <div className='flex w-full gap-2'>
             <AutoComplete
               options={inventoryItems}
@@ -435,6 +470,7 @@ const CreateInvoice = () => {
                     invoiceQuantity: 1, // default invoice quantity
                     discount: 0,
                     amount: rest.sellingPrice, // initial amount = sellingPrice * 1
+                    isCustomService: false,
                   },
                 ]);
                 // Reset selected item to clear the AutoComplete input.
@@ -481,37 +517,46 @@ const CreateInvoice = () => {
               </thead>
               <tbody>
                 {selectedProducts.map((product, index) => (
-                  <tr key={product._id} className='border-t'>
-                    <td className='px-4 py-3'>{product.name}</td>
+                  <tr
+                    key={product._id}
+                    className={cn(
+                      'border-t',
+                      product.isCustomService && 'bg-gray-50'
+                    )}
+                  >
+                    <td className='px-4 py-3'>
+                      {product.name}
+                      {product.isCustomService && (
+                        <span className='ml-2 text-xs text-blue-600'>
+                          (Service)
+                        </span>
+                      )}
+                    </td>
                     <td className='px-4 py-3'>{product.units}</td>
                     <td className='px-4 py-3'>
-                      <Input
-                        type='number'
-                        value={product.invoiceQuantity.toString()}
-                        onChange={(e) =>
-                          handleProductQuantityChange(
-                            index,
-                            Number(e.target.value)
-                          )
-                        }
-                        className='w-20'
-                        min={1}
-                        // max={product.availableQuantity}
-                      />
+                      {product.isCustomService ? (
+                        <></>
+                      ) : (
+                        <Input
+                          type='number'
+                          value={product.invoiceQuantity.toString()}
+                          onChange={(e) =>
+                            handleProductQuantityChange(
+                              index,
+                              Number(e.target.value)
+                            )
+                          }
+                          className='w-20'
+                          min={1}
+                        />
+                      )}
                     </td>
                     <td className='px-4 py-3'>
                       ₹{product.sellingPrice.toFixed(2)}
                     </td>
-                    {/* <td className='px-4 py-3'>
-                      ₹{product.discount.toFixed(2)}
-                    </td> */}
                     <td className='px-4 py-3'>₹{product.amount.toFixed(2)}</td>
                     <td className='px-4 py-3'>
                       <div className='flex gap-2'>
-                        {/* Edit functionality not implemented */}
-                        {/* <Button type='button' size='icon' variant='ghost'>
-                          <Pencil className='h-4 w-4' />
-                        </Button> */}
                         <Button
                           type='button'
                           size='icon'
@@ -639,6 +684,13 @@ const CreateInvoice = () => {
           </Button>
         </div>
       </form>
+
+      {/* Custom Service Modal */}
+      <CustomServiceModal
+        isOpen={isCustomServiceModalOpen}
+        onClose={() => setIsCustomServiceModalOpen(false)}
+        onSubmit={handleAddCustomService}
+      />
     </div>
   );
 };

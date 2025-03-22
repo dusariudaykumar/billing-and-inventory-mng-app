@@ -24,6 +24,7 @@ interface Item {
   amount: number;
   discount: number;
   units: string;
+  isCustomService?: boolean;
 }
 
 export enum PaymentMethods {

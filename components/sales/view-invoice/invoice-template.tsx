@@ -92,7 +92,10 @@ const InvoiceTemplate: React.FC = () => {
             </div>
             <div className='flex items-center'>
               <span className='pr-2'>M/s.</span>
-              <span className='flex-1 border-b border-gray-300'>
+              <span className='flex-1 border-b border-gray-300 font-semibold'>
+                {data?.customerId.companyName
+                  ? data?.customerId.companyName
+                  : ''}{' '}
                 {data?.customerId.name || '---'}
               </span>
             </div>
@@ -115,7 +118,7 @@ const InvoiceTemplate: React.FC = () => {
           {/* Invoice Items Table */}
           <section>
             <div className='overflow-x-auto'>
-              <table className='w-full border border-gray-300'>
+              <table className='w-full border border-gray-300 [&>tr]:last:border-b-0'>
                 <thead className='border-b'>
                   <tr className='bg-gray-50'>
                     <th className='w-20 border-r border-gray-300 px-4 py-2 text-center text-sm'>
@@ -137,7 +140,7 @@ const InvoiceTemplate: React.FC = () => {
                 </thead>
                 <tbody>
                   {data?.items.map((item, index) => (
-                    <tr key={index} className='border-b border-gray-300'>
+                    <tr key={index} className=' border-gray-300'>
                       <td className='border-r border-gray-300 px-4 py-2 text-center'>
                         {index + 1}
                       </td>
@@ -145,7 +148,7 @@ const InvoiceTemplate: React.FC = () => {
                         {item.name}
                       </td>
                       <td className='border-r border-gray-300 px-4 py-2 text-center'>
-                        {item.quantity}
+                        {item.isCustomService ? <></> : item.quantity}
                       </td>
                       <td className='border-r border-gray-300 px-4 py-2 text-right'>
                         {item.sellingPrice
@@ -158,31 +161,33 @@ const InvoiceTemplate: React.FC = () => {
                     </tr>
                   ))}
                   {/* Empty rows to match original design */}
-                  {[...Array(3)].map((_, index) => (
-                    <tr
-                      key={`empty-${index}`}
-                      className='border-b border-gray-300'
-                    >
-                      <td className='border-r border-gray-300 px-4 py-2'>
-                        &nbsp;
-                      </td>
-                      <td className='border-r border-gray-300 px-4 py-2'>
-                        &nbsp;
-                      </td>
-                      <td className='border-r border-gray-300 px-4 py-2'>
-                        &nbsp;
-                      </td>
-                      <td className='border-r border-gray-300 px-4 py-2'>
-                        &nbsp;
-                      </td>
-                      <td className='px-4 py-2'>&nbsp;</td>
-                    </tr>
-                  ))}
+                  {[...Array(Math.max(0, 3 - (data?.items.length || 0)))].map(
+                    (_, index) => (
+                      <tr
+                        key={`empty-${index}`}
+                        className='border-b border-gray-300'
+                      >
+                        <td className='border-r border-gray-300 px-4 py-2'>
+                          &nbsp;
+                        </td>
+                        <td className='border-r border-gray-300 px-4 py-2'>
+                          &nbsp;
+                        </td>
+                        <td className='border-r border-gray-300 px-4 py-2'>
+                          &nbsp;
+                        </td>
+                        <td className='border-r border-gray-300 px-4 py-2'>
+                          &nbsp;
+                        </td>
+                        <td className='px-4 py-2'>&nbsp;</td>
+                      </tr>
+                    )
+                  )}
                   {/* Total row */}
-                  <tr>
+                  <tr className='border-t'>
                     <td
                       colSpan={4}
-                      className='border-r border-gray-300 px-4 py-2 text-right text-sm font-bold'
+                      className='border-r border-t border-gray-300 px-4 py-2 text-right text-sm font-bold'
                     >
                       SUB TOTAL:
                     </td>

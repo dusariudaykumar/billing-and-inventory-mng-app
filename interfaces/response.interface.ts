@@ -161,6 +161,7 @@ export interface Item {
   discount: number;
   amount: number;
   quantity: number;
+  isCustomService?: boolean;
 }
 
 export interface Sale {

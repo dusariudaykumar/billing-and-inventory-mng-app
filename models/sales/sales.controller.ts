@@ -141,24 +141,28 @@ export const handleUpdateInvoice = async (
     }
 
     // Reverse inventory changes from the old invoice
-    const revertInventoryUpdates = existingInvoice.items.map((item: any) => ({
-      updateOne: {
-        filter: { _id: item.itemId },
-        update: { $inc: { quantity: item.quantity } }, // Restore previous quantity
-      },
-    }));
+    const revertInventoryUpdates = existingInvoice.items
+      .filter((item) => !item.isCustomService)
+      .map((item) => ({
+        updateOne: {
+          filter: { _id: item.itemId },
+          update: { $inc: { quantity: item.quantity } },
+        },
+      }));
 
     if (revertInventoryUpdates.length > 0) {
       await Inventory.bulkWrite(revertInventoryUpdates);
     }
 
     // Apply new inventory updates
-    const newInventoryUpdates = payload.items?.map((item: any) => ({
-      updateOne: {
-        filter: { _id: new mongoose.Types.ObjectId(item.itemId) },
-        update: { $inc: { quantity: -item.quantity } }, // Deduct new quantity
-      },
-    }));
+    const newInventoryUpdates = payload.items
+      ?.filter((item: any) => !item.isCustomService)
+      ?.map((item: any) => ({
+        updateOne: {
+          filter: { _id: new mongoose.Types.ObjectId(item.itemId) },
+          update: { $inc: { quantity: -item.quantity } }, // Deduct new quantity
+        },
+      }));
 
     if (newInventoryUpdates && newInventoryUpdates.length > 0) {
       await Inventory.bulkWrite(newInventoryUpdates);

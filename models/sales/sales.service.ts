@@ -61,10 +61,19 @@ export const createInvoice = async (payload: ISales) => {
     const { customerId, items, ...info } = payload;
 
     const formattedCustomerId = new mongoose.Types.ObjectId(customerId);
-    const formattedItems = items.map(({ itemId, ...rest }) => ({
-      itemId: new mongoose.Types.ObjectId(itemId),
-      ...rest,
-    }));
+    const formattedItems = items.map(({ itemId, isCustomService, ...rest }) => {
+      const itemIdForQuery =
+        typeof itemId === 'string'
+          ? (itemId as string).startsWith('custom-')
+            ? new mongoose.Types.ObjectId()
+            : new mongoose.Types.ObjectId(itemId)
+          : itemId;
+      return {
+        itemId: itemIdForQuery,
+        isCustomService: isCustomService || false,
+        ...rest,
+      };
+    });
 
     // Update inventory in bulk
     const bulkUpdates = formattedItems.map((item) => ({
