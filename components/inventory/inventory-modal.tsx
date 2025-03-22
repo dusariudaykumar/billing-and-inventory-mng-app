@@ -11,8 +11,16 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   AddNewItemToInventoryPayload,
   Inventory,
+  Units,
 } from '@/interfaces/response.interface';
 import { InventoryFormData, inventorySchema } from '@/lib/schemas';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -26,6 +34,14 @@ interface Props {
   onSubmit: (item: AddNewItemToInventoryPayload) => void;
 }
 
+const DEFAULT_VALUES = {
+  name: '',
+  purchasePrice: 1,
+  sellingPrice: 1,
+  quantity: 99,
+  units: Units.PIECE,
+};
+
 export const ItemModal: React.FC<Props> = ({
   OnClose,
   isOpen,
@@ -35,11 +51,11 @@ export const ItemModal: React.FC<Props> = ({
   const form = useForm<InventoryFormData>({
     resolver: zodResolver(inventorySchema),
     defaultValues: {
-      name: item?.name || '',
-      purchasePrice: item?.purchasePrice || 1,
-      sellingPrice: item?.sellingPrice || 1,
-      quantity: item?.quantity || 1,
-      units: item?.units || '',
+      name: item?.name || DEFAULT_VALUES.name,
+      purchasePrice: item?.purchasePrice || DEFAULT_VALUES.purchasePrice,
+      sellingPrice: item?.sellingPrice || DEFAULT_VALUES.sellingPrice,
+      quantity: item?.quantity || DEFAULT_VALUES.quantity,
+      units: item?.units || DEFAULT_VALUES.units,
     },
   });
 
@@ -170,11 +186,22 @@ export const ItemModal: React.FC<Props> = ({
                     Units <span className='text-red-500'>*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder='Piece / Kg / etc.'
-                      className='w-full'
+                    <Select
                       {...field}
-                    />
+                      defaultValue={field.value}
+                      onValueChange={(value) => field.onChange(value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder='Select Units (Piece / KG)' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.values(Units).map((status) => (
+                          <SelectItem key={status} value={status}>
+                            {status}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

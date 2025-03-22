@@ -137,7 +137,10 @@ const SupplierTable = () => {
       </div>
       {openSupplierModel && (
         <SupplierModel
-          OnClose={() => setOpenSupplierModel(false)}
+          OnClose={() => {
+            setOpenSupplierModel(false);
+            setSelectedSupplier(undefined);
+          }}
           isOpen={openSupplierModel}
           supplier={selectedSupplier}
           onSubmit={async (supplier) => {

@@ -142,7 +142,10 @@ const CustomerTable = () => {
       </div>
       {openCustomerModel && (
         <CustomerModel
-          OnClose={() => setOpenCustomerModel(false)}
+          OnClose={() => {
+            setOpenCustomerModel(false);
+            setSelectedCustomer(undefined);
+          }}
           isOpen={openCustomerModel}
           customer={selectedCustomer}
           onSubmit={async (customer) => {

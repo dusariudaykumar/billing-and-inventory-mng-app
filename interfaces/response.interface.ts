@@ -194,3 +194,8 @@ export type GetInvoiceAPIResponse = IResponse<
 >;
 
 export type UpdateInvoiceAPIResponse = IResponse<Sale>;
+
+export enum Units {
+  PIECE = 'Piece',
+  KG = 'KG',
+}

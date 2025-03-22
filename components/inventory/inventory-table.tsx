@@ -142,7 +142,10 @@ const InventoryTable = () => {
       </div>
       {openInventoryModel && (
         <ItemModal
-          OnClose={() => setOpenInventoryModel(false)}
+          OnClose={() => {
+            setOpenInventoryModel(false);
+            setSelectedItem(undefined);
+          }}
           isOpen={openInventoryModel}
           item={selectedItem}
           onSubmit={async (item) => {
