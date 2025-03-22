@@ -99,13 +99,11 @@ const CreateInvoice = () => {
     page: 1,
   });
 
-  const [
-    inventoryItemsParams,
-    // setInventoryItemsParams
-  ] = useState<BasicQueryParams>({
-    limit: 10,
-    page: 1,
-  });
+  const [inventoryItemsParams, setInventoryItemsParams] =
+    useState<BasicQueryParams>({
+      limit: 10,
+      page: 1,
+    });
 
   const [createInvoice, { isLoading }] = useCreateInvoiceMutation();
 
@@ -415,6 +413,10 @@ const CreateInvoice = () => {
               getOptionLabel={(option) => option?.name || ''}
               getOptionValue={(option) => option?._id || ''}
               selectedValue={selectedItem}
+              searchValue={inventoryItemsParams.search}
+              onSearchValueChange={(value) =>
+                setInventoryItemsParams((prev) => ({ ...prev, search: value }))
+              }
               onSelectedValueChange={(option) => {
                 if (!option) return;
 

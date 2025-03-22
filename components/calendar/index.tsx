@@ -14,7 +14,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import logger from '@/lib/logger';
 
 interface Props {
   onChange: (value: Date) => void;
@@ -30,7 +29,7 @@ export const CalendarForm: React.FC<Props> = ({
   label,
 }) => {
   const formMethods = useForm();
-  logger({ data: new Date('10/02/2025'), selectedDate });
+
   return (
     <FormProvider {...formMethods}>
       <form className={className}>

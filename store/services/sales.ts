@@ -34,6 +34,7 @@ export const salesApi = createApi({
       query: (id) => ({
         url: `/sales?id=${id}`,
       }),
+      providesTags: ['invoice'],
     }),
 
     updateInvoice: builder.mutation<
@@ -80,6 +81,7 @@ export const salesApi = createApi({
           logger(error, 'Error');
         }
       },
+      invalidatesTags: (_, error) => (error ? [] : ['invoice']),
     }),
     deleteInvoice: builder.mutation<
       { success: boolean; message: string },

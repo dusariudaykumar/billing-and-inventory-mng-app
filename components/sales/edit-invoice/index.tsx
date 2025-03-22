@@ -15,7 +15,12 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { useLoading } from '@/context/loader-provider';
 import { currencyFormat } from '@/helpers/currency-format';
-import { CreateInvoicePayload, Item } from '@/interfaces/payload.interface';
+import { useDebounce } from '@/hooks/use-debounce';
+import {
+  BasicQueryParams,
+  CreateInvoicePayload,
+  Item,
+} from '@/interfaces/payload.interface';
 import { InvoiceStatus, PaymentMethods } from '@/interfaces/response.interface';
 import logger from '@/lib/logger';
 import { useGetAllCustomersQuery } from '@/store/services/customer';
@@ -34,6 +39,13 @@ const EditInvoice = () => {
   const { id } = router.query;
   const { showLoader, hideLoader } = useLoading();
 
+  const [inventoryItemsParams, setInventoryItemsParams] =
+    useState<BasicQueryParams>({
+      limit: 10,
+      page: 1,
+    });
+
+  const debouncedInventoryItemSearch = useDebounce(inventoryItemsParams.search);
   // Queries
   const { data: invoiceData, isLoading: isInvoiceLoading } = useGetInvoiceQuery(
     id as string,
@@ -42,7 +54,11 @@ const EditInvoice = () => {
     }
   );
   const { data: customersData } = useGetAllCustomersQuery({});
-  const { data: inventoryData } = useGetAllItemsFromInventoryQuery({});
+  const { data: inventoryData } = useGetAllItemsFromInventoryQuery({
+    limit: inventoryItemsParams.limit,
+    page: inventoryItemsParams.page,
+    search: debouncedInventoryItemSearch,
+  });
   const [updateInvoice] = useUpdateInvoiceMutation();
 
   // Form state
@@ -420,9 +436,15 @@ const EditInvoice = () => {
               getOptionLabel={(option) => option?.name || ''}
               getOptionValue={(option) => option?._id || ''}
               selectedValue={null}
+              searchValue={inventoryItemsParams.search}
+              onSearchValueChange={(value) =>
+                setInventoryItemsParams((prev) => ({ ...prev, search: value }))
+              }
               onSelectedValueChange={handleAddProduct}
               placeholder='Search items...'
               className='w-full'
+              isLoadingMore={false}
+              shouldFilter={false}
             />
             <Button type='button' size='icon' disabled>
               <Plus />
