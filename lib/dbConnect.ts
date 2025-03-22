@@ -1,3 +1,4 @@
+import '@/models';
 import mongoose from 'mongoose';
 
 // Type definitions
