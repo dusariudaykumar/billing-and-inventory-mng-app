@@ -18,7 +18,7 @@ export const getAllCustomers = async (
 
   return {
     customers,
-    totalPages: Math.ceil(count / limit),
+    totalPages: Math.ceil(count / limit - 1),
     currentPage: page,
     totalResults: count,
   };

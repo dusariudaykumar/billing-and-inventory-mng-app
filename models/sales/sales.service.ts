@@ -44,7 +44,7 @@ export const getAllSales = async (query: any, limit: number, page: number) => {
     const result = await Sales.aggregate(pipeline);
     return {
       sales: result[0]?.data || [],
-      totalPages: Math.ceil((result[0]?.totalResults || 0) / limit),
+      totalPages: Math.ceil((result[0]?.totalResults || 0) / limit - 1),
       current: page,
       totalResults: result[0]?.totalResults || 0,
     };

@@ -22,7 +22,7 @@ export const getAllPurchases = async (limit: number, page: number) => {
 
   return {
     purchases,
-    totalPages: Math.ceil(count / limit),
+    totalPages: Math.ceil(count / limit - 1),
     currentPage: page,
     totalResults: count,
   };

@@ -15,7 +15,7 @@ export const getAllItemsFromInventory = async (
   const count = await Inventory.countDocuments();
   return {
     items,
-    totalPages: Math.ceil(count / limit),
+    totalPages: Math.ceil(count / limit - 1),
     totalResults: count,
     currentPage: page,
   };
