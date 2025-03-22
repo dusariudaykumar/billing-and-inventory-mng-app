@@ -189,6 +189,8 @@ const InvoiceTemplate: React.FC = () => {
                     <td className='px-4 py-2 text-right font-medium'>
                       {data?.totalAmount && data?.discount
                         ? currencyFormat(data.discount + data.totalAmount)
+                        : data?.totalAmount
+                        ? currencyFormat(data.totalAmount)
                         : '---'}
                     </td>
                   </tr>
