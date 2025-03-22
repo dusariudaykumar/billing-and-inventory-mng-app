@@ -195,7 +195,7 @@ const InvoiceTemplate: React.FC = () => {
                     </td>
                   </tr>
 
-                  {data?.discount && (
+                  {data?.discount ? (
                     <tr>
                       <td
                         colSpan={4}
@@ -208,6 +208,8 @@ const InvoiceTemplate: React.FC = () => {
                         {data.discount ? currencyFormat(data.discount) : '---'}
                       </td>
                     </tr>
+                  ) : (
+                    <></>
                   )}
 
                   <tr>
