@@ -85,7 +85,7 @@ const InvoiceTemplate: React.FC = () => {
                 <span className='pr-2'>Date:</span>
                 <span className='border-b border-gray-300'>
                   {data?.invoiceDate
-                    ? new Date(data.invoiceDate).toLocaleDateString()
+                    ? new Date(data.invoiceDate).toLocaleDateString('en-GB')
                     : 'N/A'}
                 </span>
               </div>

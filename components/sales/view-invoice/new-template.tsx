@@ -35,7 +35,7 @@ const InvoiceTemplate: React.FC = () => {
             <p className='text-gray-500'>
               Issue Date:{' '}
               {data?.invoiceDate
-                ? new Date(data.invoiceDate).toLocaleDateString()
+                ? new Date(data.invoiceDate).toLocaleDateString('en-GB')
                 : 'N/A'}
               {/* {new Date()} */}
               {/* {format(data?.invoiceDate || '', 'dd/MM/yyyy')} */}

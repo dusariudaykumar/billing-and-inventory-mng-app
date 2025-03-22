@@ -134,11 +134,7 @@ export const getCustomerDetailsHandler = async (
       totalBusiness: allSales.reduce((sum, sale) => sum + sale.totalAmount, 0),
       dueAmount: allSales.reduce((sum, sale) => sum + sale.dueAmount, 0),
       totalInvoices: allSales.length,
-      avgOrderValue:
-        allSales.length > 0
-          ? allSales.reduce((sum, sale) => sum + sale.totalAmount, 0) /
-            allSales.length
-          : 0,
+      totalPaid: allSales.reduce((sum, sale) => sum + sale.customerPaid, 0),
     };
 
     // Transform sales data for frontend

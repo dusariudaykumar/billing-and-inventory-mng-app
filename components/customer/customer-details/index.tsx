@@ -70,13 +70,13 @@ const CustomerDeatils = () => {
                 <div>
                   <div className='flex items-center space-x-3'>
                     <h1 className='text-2xl font-bold text-gray-900'>
-                      {data?.name || '---'}
+                      {data?.companyName || ''} {data?.name || '---'}
                     </h1>
                     <span className='rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-700'>
                       {data?.status || '---'}
                     </span>
                   </div>
-                  <div className='mt-2 grid grid-cols-2 space-y-2'>
+                  <div className='mt-2 grid grid-cols-2 gap-2'>
                     <div className='flex items-center text-gray-600'>
                       <Building2 className='mr-2 h-4 w-4' />
                       <span className='text-sm'>
@@ -115,7 +115,7 @@ const CustomerDeatils = () => {
               <div className='flex items-center justify-between'>
                 <div>
                   <p className='text-sm font-medium text-gray-500'>
-                    Total Business
+                    Total Bills
                   </p>
                   <h3 className='mt-2 text-2xl font-bold text-gray-900'>
                     {currencyFormat(data?.stats.totalBusiness || 0)}
@@ -151,14 +151,14 @@ const CustomerDeatils = () => {
               <div className='flex items-center justify-between'>
                 <div>
                   <p className='text-sm font-medium text-gray-500'>
-                    Total Invoices
+                    Total Paid
                   </p>
                   <h3 className='mt-2 text-2xl font-bold text-gray-900'>
-                    {data?.stats?.totalInvoices || '---'}
+                    {currencyFormat(data?.stats?.totalPaid || 0)}
                   </h3>
                 </div>
-                <div className='flex h-12 w-12 items-center justify-center rounded-full bg-purple-50'>
-                  <ArrowUpRight className='h-6 w-6 text-purple-600' />
+                <div className='flex h-12 w-12 items-center justify-center rounded-full bg-green-50'>
+                  <ArrowDownRight className='h-6 w-6 text-green-600' />
                 </div>
               </div>
             </CardContent>
@@ -169,14 +169,14 @@ const CustomerDeatils = () => {
               <div className='flex items-center justify-between'>
                 <div>
                   <p className='text-sm font-medium text-gray-500'>
-                    Avg. Order Value
+                    Total Invoices
                   </p>
                   <h3 className='mt-2 text-2xl font-bold text-gray-900'>
-                    {currencyFormat(data?.stats?.avgOrderValue || 0)}
+                    {data?.stats?.totalInvoices || 0}
                   </h3>
                 </div>
-                <div className='flex h-12 w-12 items-center justify-center rounded-full bg-green-50'>
-                  <ArrowDownRight className='h-6 w-6 text-green-600' />
+                <div className='flex h-12 w-12 items-center justify-center rounded-full bg-purple-50'>
+                  <ArrowUpRight className='h-6 w-6 text-purple-600' />
                 </div>
               </div>
             </CardContent>
@@ -214,7 +214,7 @@ const CustomerDeatils = () => {
                       0{sale.invoiceNumber}
                     </Link>
                     <div className='text-gray-900'>
-                      {new Date(sale.date).toLocaleDateString() || 'N/A'}
+                      {new Date(sale.date).toLocaleDateString('en-GB') || 'N/A'}
                     </div>
                     <div className='font-medium text-gray-900'>
                       {currencyFormat(sale.amount)}

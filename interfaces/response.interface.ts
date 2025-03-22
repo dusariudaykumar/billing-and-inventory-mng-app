@@ -72,7 +72,7 @@ interface CustomerDetails {
     totalBusiness: number;
     dueAmount: number;
     totalInvoices: number;
-    avgOrderValue: number;
+    totalPaid: number;
   };
   recentSales: Array<{
     id: string;
