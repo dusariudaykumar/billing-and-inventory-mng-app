@@ -14,11 +14,11 @@ export const getAllCustomers = async (
     .skip((page - 1) * limit)
     .sort({ createdAt: -1 });
 
-  const count = await Customer.countDocuments(query);
+  const count = await Customer.countDocuments({ isActive: true, ...query });
 
   return {
     customers,
-    totalPages: Math.ceil(count / limit - 1),
+    totalPages: Math.ceil(count / limit),
     currentPage: page,
     totalResults: count,
   };

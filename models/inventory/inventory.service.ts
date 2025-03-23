@@ -12,10 +12,11 @@ export const getAllItemsFromInventory = async (
     .skip((page - 1) * limit)
     .sort({ createdAt: -1 });
 
-  const count = await Inventory.countDocuments();
+  const count = await Inventory.countDocuments({ isActive: true, ...query });
+
   return {
     items,
-    totalPages: Math.ceil(count / limit - 1),
+    totalPages: Math.ceil(count / limit),
     totalResults: count,
     currentPage: page,
   };

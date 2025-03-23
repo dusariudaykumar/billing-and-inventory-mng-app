@@ -18,11 +18,11 @@ export const getAllPurchases = async (limit: number, page: number) => {
     .skip(skip)
     .sort({ createdAt: -1 });
 
-  const count = await Purchases.countDocuments();
+  const count = await Purchases.countDocuments({ isActive: true });
 
   return {
     purchases,
-    totalPages: Math.ceil(count / limit - 1),
+    totalPages: Math.ceil(count / limit),
     currentPage: page,
     totalResults: count,
   };

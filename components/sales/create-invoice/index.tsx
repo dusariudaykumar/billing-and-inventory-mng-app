@@ -109,7 +109,7 @@ const CreateInvoice = () => {
 
   const [inventoryItemsParams, setInventoryItemsParams] =
     useState<BasicQueryParams>({
-      limit: 10,
+      limit: 30,
       page: 1,
     });
 

@@ -14,7 +14,7 @@ export const getAllSuppliers = async (
     .skip((page - 1) * limit)
     .sort({ createdAt: -1 });
 
-  const count = await Supplier.countDocuments(query);
+  const count = await Supplier.countDocuments({ isActive: true, ...query });
   return {
     suppliers,
     totalPages: Math.ceil(count / limit),

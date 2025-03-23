@@ -9,7 +9,6 @@ import {
   updateInventoryItem,
 } from '@/models/inventory/inventory.service';
 import logger from 'lib/logger';
-import _ from 'lodash';
 import mongoose from 'mongoose';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -24,15 +23,19 @@ export const getInventoryHandler = async (
     let baseQuery: object = {};
     const { page = 1, limit = 10, search } = req.query;
 
-    const searchProps = ['name'];
-
     if (typeof search === 'string') {
-      const searchQuery = _.chain(searchProps)
-        .map((prop) => textToMongoRegExpStatements(prop, search))
-        .flatten()
-        .filter((it) => !!it)
-        .value();
-      baseQuery = { $or: searchQuery };
+      const textSearchQuery = textToMongoRegExpStatements('name', search);
+
+      const priceQuery = [];
+      const numericSearch = parseFloat(search);
+
+      if (!isNaN(numericSearch)) {
+        priceQuery.push({ sellingPrice: numericSearch });
+      }
+
+      baseQuery = {
+        $or: [...textSearchQuery, ...priceQuery],
+      };
     }
 
     const inventory = await getAllItemsFromInventory(
