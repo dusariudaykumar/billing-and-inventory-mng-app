@@ -27,7 +27,7 @@ const InvoiceTemplate: React.FC = () => {
 
   if (!data && !isLoading) {
     return (
-      <div className='flex h-full w-full flex-col items-center justify-center gap-4 p-8'>
+      <div className='flex h-full w-full flex-col items-center justify-center gap-4 p-4 sm:p-8'>
         <div className='text-xl'>Invoice not found</div>
         <Button onClick={() => router.push('/sales')}>
           <ArrowLeft className='mr-2 h-4 w-4' />
@@ -38,43 +38,58 @@ const InvoiceTemplate: React.FC = () => {
   }
 
   return (
-    <div className='flex h-full w-full flex-1 flex-col space-y-8 overflow-auto p-8'>
-      <div className='flex items-center justify-between'>
-        <h2 className='text-2xl font-bold tracking-tight'>Invoice</h2>
-        <div className='flex gap-2'>
-          <Button onClick={() => handlePrintInvoice()} className='ml-auto'>
-            <Printer className='h-4 w-4' />
-            Print Invoice
-          </Button>
-          <Button variant='outline' onClick={() => router.push('/sales')}>
+    <div className='flex h-full w-full flex-1 flex-col space-y-4 overflow-auto p-4 sm:space-y-8 sm:p-8'>
+      <div className='flex flex-col justify-between gap-4  sm:flex-row sm:items-start'>
+        <h2 className='text-xl font-bold tracking-tight sm:text-2xl'>
+          Invoice
+        </h2>
+        <div className='xs:flex-row flex flex-col gap-2'>
+          <Button
+            variant='outline'
+            onClick={() => router.push('/sales')}
+            className='xs:w-auto w-full'
+          >
             <ArrowLeft className='mr-2 h-4 w-4' />
             Back to Sales
+          </Button>
+          <Button
+            onClick={() => handlePrintInvoice()}
+            className='xs:w-auto w-full sm:ml-auto'
+          >
+            <Printer className='mr-2 h-4 w-4' />
+            Print Invoice
           </Button>
         </div>
       </div>
 
-      <Card className='mx-auto max-w-4xl bg-white' ref={printContentRef}>
-        <CardContent className='p-6'>
+      <Card className='mx-auto w-full max-w-4xl bg-white' ref={printContentRef}>
+        <CardContent className='p-4 sm:p-6'>
           {/* Header Section */}
-          <header className='mb-6 flex flex-col items-center justify-center'>
+          <header className='mb-4 flex flex-col items-center justify-center sm:mb-6'>
             <h6 className='font-bold underline'>ESTIMATE</h6>
             {/* Logo placeholder */}
-            <div className='flex items-center gap-6'>
-              <Image src='/logo.png' alt='SRD Logo' width={84} height={20} />
-              <h2 className='font-serif text-5xl'>SRD</h2>
+            <div className='my-2 flex items-center gap-3 sm:gap-6'>
+              <Image
+                src='/logo.png'
+                alt='SRD Logo'
+                width={84}
+                height={20}
+                className='h-auto w-16 sm:w-auto'
+              />
+              <h2 className='font-serif text-3xl sm:text-5xl'>SRD</h2>
               <Image
                 src='/rockdrills.jpg'
                 alt='SRD Logo'
                 width={74}
                 height={20}
+                className='h-auto w-14 sm:w-auto'
               />
             </div>
-            {/* </div> */}
           </header>
 
           {/* Invoice Details Section */}
-          <section className='mb-8 space-y-4'>
-            <div className='flex items-center justify-between'>
+          <section className='mb-6 space-y-3 sm:mb-8 sm:space-y-4'>
+            <div className='flex flex-col justify-between gap-2 sm:flex-row sm:items-center sm:gap-0'>
               <div className='flex items-center'>
                 <span className='pr-2'>No.</span>
                 <span className='text-sm font-semibold text-blue-600'>
@@ -92,21 +107,21 @@ const InvoiceTemplate: React.FC = () => {
             </div>
             <div className='flex items-center'>
               <span className='pr-2'>M/s.</span>
-              <span className='flex-1 border-b border-gray-300 font-semibold'>
+              <span className='flex-1 truncate border-b border-gray-300 font-semibold'>
                 {data?.customerId.companyName
                   ? data?.customerId.companyName
                   : ''}{' '}
                 {data?.customerId.name || '---'}
               </span>
             </div>
-            <div className='flex justify-between'>
+            <div className='flex flex-col justify-between gap-2 sm:flex-row sm:gap-0'>
               <div className='flex flex-1'>
-                <span className='pr-2'>Vehicle No.</span>
-                <span className='flex-1 border-b border-gray-300'>
+                <span className='whitespace-nowrap pr-2'>Vehicle No.</span>
+                <span className='flex-1 truncate border-b border-gray-300'>
                   {data?.vehicleNumber || '---'}
                 </span>
               </div>
-              <div className='ml-8 flex'>
+              <div className='flex sm:ml-8'>
                 <span className='pr-2'>Cell No.</span>
                 <span className='w-40 border-b border-gray-300'>
                   +91 {data?.customerId?.contactDetails?.phone || '---'}
@@ -117,45 +132,45 @@ const InvoiceTemplate: React.FC = () => {
 
           {/* Invoice Items Table */}
           <section>
-            <div className='overflow-x-auto'>
-              <table className='w-full border border-gray-300 [&>tr]:last:border-b-0'>
+            <div className='-mx-4 overflow-x-auto sm:mx-0'>
+              <table className='w-full min-w-[640px] border border-gray-300 [&>tr]:last:border-b-0'>
                 <thead className='border-b'>
                   <tr className='bg-gray-50'>
-                    <th className='w-20 border-r border-gray-300 px-4 py-2 text-center text-sm'>
+                    <th className='w-16 border-r border-gray-300 px-2 py-2 text-center text-xs sm:w-20 sm:px-4 sm:text-sm'>
                       Sl. No
                     </th>
-                    <th className='font-sm border-r border-gray-300 px-4 py-2 text-center text-sm'>
+                    <th className='font-sm border-r border-gray-300 px-2 py-2 text-center text-xs sm:px-4 sm:text-sm'>
                       PARTICULARS
                     </th>
-                    <th className='w-24 border-r border-gray-300 px-4 py-2 text-center text-sm'>
+                    <th className='w-16 border-r border-gray-300 px-2 py-2 text-center text-xs sm:w-24 sm:px-4 sm:text-sm'>
                       Qty.
                     </th>
-                    <th className='w-32 border-r border-gray-300 px-4 py-2 text-center text-sm'>
+                    <th className='w-24 border-r border-gray-300 px-2 py-2 text-center text-xs sm:w-32 sm:px-4 sm:text-sm'>
                       Rate
                     </th>
-                    <th className='w-36 px-4 py-2 text-center text-sm'>
+                    <th className='w-24 px-2 py-2 text-center text-xs sm:w-36 sm:px-4 sm:text-sm'>
                       AMOUNT
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {data?.items.map((item, index) => (
-                    <tr key={index} className=' border-gray-300'>
-                      <td className='border-r border-gray-300 px-4 py-2 text-center'>
+                    <tr key={index} className='border-gray-300'>
+                      <td className='border-r border-gray-300 px-2 py-2 text-center text-sm sm:px-4'>
                         {index + 1}
                       </td>
-                      <td className='border-r border-gray-300 px-4 py-2'>
+                      <td className='border-r border-gray-300 px-2 py-2 text-sm sm:px-4'>
                         {item.name}
                       </td>
-                      <td className='border-r border-gray-300 px-4 py-2 text-center'>
+                      <td className='border-r border-gray-300 px-2 py-2 text-center text-sm sm:px-4'>
                         {item.isCustomService ? <></> : item.quantity}
                       </td>
-                      <td className='border-r border-gray-300 px-4 py-2 text-right'>
+                      <td className='border-r border-gray-300 px-2 py-2 text-right text-sm sm:px-4'>
                         {item.sellingPrice
                           ? currencyFormat(item.sellingPrice)
                           : '---'}
                       </td>
-                      <td className='px-4 py-2 text-right'>
+                      <td className='px-2 py-2 text-right text-sm sm:px-4'>
                         {item.amount ? currencyFormat(item.amount) : '---'}
                       </td>
                     </tr>
@@ -167,19 +182,19 @@ const InvoiceTemplate: React.FC = () => {
                         key={`empty-${index}`}
                         className='border-b border-gray-300'
                       >
-                        <td className='border-r border-gray-300 px-4 py-2'>
+                        <td className='border-r border-gray-300 px-2 py-2 sm:px-4'>
                           &nbsp;
                         </td>
-                        <td className='border-r border-gray-300 px-4 py-2'>
+                        <td className='border-r border-gray-300 px-2 py-2 sm:px-4'>
                           &nbsp;
                         </td>
-                        <td className='border-r border-gray-300 px-4 py-2'>
+                        <td className='border-r border-gray-300 px-2 py-2 sm:px-4'>
                           &nbsp;
                         </td>
-                        <td className='border-r border-gray-300 px-4 py-2'>
+                        <td className='border-r border-gray-300 px-2 py-2 sm:px-4'>
                           &nbsp;
                         </td>
-                        <td className='px-4 py-2'>&nbsp;</td>
+                        <td className='px-2 py-2 sm:px-4'>&nbsp;</td>
                       </tr>
                     )
                   )}
@@ -187,11 +202,11 @@ const InvoiceTemplate: React.FC = () => {
                   <tr className='border-t'>
                     <td
                       colSpan={4}
-                      className='border-r border-t border-gray-300 px-4 py-2 text-right text-sm font-bold'
+                      className='border-r border-t border-gray-300 px-2 py-2 text-right text-xs font-bold sm:px-4 sm:text-sm'
                     >
                       SUB TOTAL:
                     </td>
-                    <td className='px-4 py-2 text-right font-medium'>
+                    <td className='px-2 py-2 text-right text-sm font-medium sm:px-4'>
                       {data?.totalAmount && data?.discount
                         ? currencyFormat(data.discount + data.totalAmount)
                         : data?.totalAmount
@@ -204,12 +219,12 @@ const InvoiceTemplate: React.FC = () => {
                     <tr>
                       <td
                         colSpan={4}
-                        className='border-r border-gray-300 px-4 py-2 pt-0 text-right text-sm font-bold'
+                        className='border-r border-gray-300 px-2 py-2 pt-0 text-right text-xs font-bold sm:px-4 sm:text-sm'
                       >
                         DISCOUNT:
                       </td>
-                      <td className='flex items-center justify-end px-4 py-2 pt-0 text-right font-medium'>
-                        <Minus />{' '}
+                      <td className='flex items-center justify-end px-2 py-2 pt-0 text-right text-sm font-medium sm:px-4'>
+                        <Minus className='h-3 w-3 sm:h-4 sm:w-4' />{' '}
                         {data.discount ? currencyFormat(data.discount) : '---'}
                       </td>
                     </tr>
@@ -220,11 +235,11 @@ const InvoiceTemplate: React.FC = () => {
                   <tr>
                     <td
                       colSpan={4}
-                      className='border-r border-gray-300 px-4 py-2 pt-0 text-right text-sm font-bold'
+                      className='border-r border-gray-300 px-2 py-2 pt-0 text-right text-xs font-bold sm:px-4 sm:text-sm'
                     >
                       TOTAL:
                     </td>
-                    <td className='px-4 py-2 pt-0 text-right font-medium '>
+                    <td className='px-2 py-2 pt-0 text-right text-sm font-medium sm:px-4 '>
                       {data?.totalAmount
                         ? currencyFormat(data.totalAmount)
                         : '---'}
@@ -236,15 +251,15 @@ const InvoiceTemplate: React.FC = () => {
           </section>
 
           {/* Signature Section */}
-          <footer className='mt-20 flex justify-between'>
+          <footer className='mt-12 flex justify-between sm:mt-20'>
             <div>
-              <div className='w-48 border-t border-gray-400 pt-1'>
-                <span className='text-sm'>Customer Signature</span>
+              <div className='w-32 border-t border-gray-400 pt-1 sm:w-48'>
+                <span className='text-xs sm:text-sm'>Customer Signature</span>
               </div>
             </div>
             <div>
-              <div className='w-48 border-t border-gray-400 pt-1'>
-                <span className='text-sm'>Signature</span>
+              <div className='w-32 border-t border-gray-400 pt-1 sm:w-48'>
+                <span className='text-xs sm:text-sm'>Signature</span>
               </div>
             </div>
           </footer>

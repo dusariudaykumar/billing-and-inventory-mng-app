@@ -585,7 +585,7 @@ const CreateInvoice = () => {
           )}
         </div>
 
-        <div className='mt-6 flex w-full gap-6'>
+        <div className='mt-6 flex w-full flex-col gap-6 md:flex-row'>
           {/* Notes Section */}
           <div className='flex w-full flex-col flex-wrap gap-2'>
             <Label htmlFor='notes'>Notes</Label>
