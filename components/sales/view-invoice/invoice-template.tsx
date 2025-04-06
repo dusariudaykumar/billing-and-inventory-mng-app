@@ -235,6 +235,22 @@ const InvoiceTemplate: React.FC = () => {
                   ) : (
                     <></>
                   )}
+                  {data?.customerPaid ? (
+                    <tr>
+                      <td
+                        colSpan={4}
+                        className='border-r border-gray-300 px-2 py-2 pt-0 text-right text-xs font-bold sm:px-4 sm:text-sm'
+                      ></td>
+                      <td className='flex items-center justify-end px-2 py-2 pt-0 text-right text-sm font-medium sm:px-4'>
+                        <Minus className='h-3 w-3 sm:h-4 sm:w-4' />{' '}
+                        {data.discount
+                          ? currencyFormat(data.customerPaid)
+                          : '---'}
+                      </td>
+                    </tr>
+                  ) : (
+                    <></>
+                  )}
 
                   <tr>
                     <td
@@ -244,9 +260,7 @@ const InvoiceTemplate: React.FC = () => {
                       TOTAL:
                     </td>
                     <td className='px-2 py-2 pt-0 text-right text-sm font-medium sm:px-4 '>
-                      {data?.totalAmount
-                        ? currencyFormat(data.totalAmount)
-                        : '---'}
+                      {data?.dueAmount ? currencyFormat(data.dueAmount) : '---'}
                     </td>
                   </tr>
                 </tbody>
