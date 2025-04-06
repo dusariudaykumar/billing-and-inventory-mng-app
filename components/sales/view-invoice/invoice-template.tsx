@@ -163,7 +163,11 @@ const InvoiceTemplate: React.FC = () => {
                         {item.name}
                       </td>
                       <td className='border-r border-gray-300 px-2 py-2 text-center text-sm sm:px-4'>
-                        {item.isCustomService ? <></> : item.quantity}
+                        {item.isCustomService && item.quantity === 0 ? (
+                          <></>
+                        ) : (
+                          item.quantity
+                        )}
                       </td>
                       <td className='border-r border-gray-300 px-2 py-2 text-right text-sm sm:px-4'>
                         {item.sellingPrice

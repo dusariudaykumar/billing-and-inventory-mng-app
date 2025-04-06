@@ -87,7 +87,7 @@ export const CustomServiceModal: React.FC<CustomServiceModalProps> = ({
               control={form.control}
               name='sellingPrice'
               render={({ field }) => (
-                <FormItem className='col-span-2'>
+                <FormItem className='col-span-1'>
                   <FormLabel>
                     Price (₹) <span className='text-red-500'>*</span>
                   </FormLabel>
@@ -98,6 +98,30 @@ export const CustomServiceModal: React.FC<CustomServiceModalProps> = ({
                       className='w-full'
                       {...field}
                       value={field.value.toString()}
+                      onChange={(e) =>
+                        field.onChange(parseFloat(e.target.value) || 0)
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name='quantity'
+              render={({ field }) => (
+                <FormItem className='col-span-1'>
+                  <FormLabel>
+                    Quantity <span className='text-gray-400'>(Optional)</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      className='w-full'
+                      {...field}
+                      type='number'
+                      value={field?.value?.toString() || 0}
                       onChange={(e) =>
                         field.onChange(parseFloat(e.target.value) || 0)
                       }

@@ -244,7 +244,7 @@ const CreateInvoice = () => {
           _id: customId,
           name: serviceData.name,
           sellingPrice: serviceData.sellingPrice,
-          units: serviceData.units || '',
+          units: (serviceData?.quantity || 0) > 0 ? 'Piece' : '',
           invoiceQuantity: serviceData?.quantity || 0,
           discount: 0,
           amount: serviceData.sellingPrice,
@@ -528,14 +528,20 @@ const CreateInvoice = () => {
                       {product.name}
                       {product.isCustomService && (
                         <span className='ml-2 text-xs text-blue-600'>
-                          (Service)
+                          {product.invoiceQuantity === 0
+                            ? '(Service)'
+                            : '(Custom item)'}
                         </span>
                       )}
                     </td>
                     <td className='px-4 py-3'>{product.units}</td>
                     <td className='px-4 py-3'>
                       {product.isCustomService ? (
-                        <></>
+                        product.invoiceQuantity === 0 ? (
+                          <></>
+                        ) : (
+                          product.invoiceQuantity
+                        )
                       ) : (
                         <Input
                           type='number'
