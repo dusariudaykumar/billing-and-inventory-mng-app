@@ -1,5 +1,7 @@
+import { InvoiceStatus } from '@/interfaces/response.interface';
 import { textToMongoRegExpStatements } from '@/lib/mongo-funs';
 import Sales from '@/models/sales/sales.modal';
+import { getUnpaidInvoicesByCustomerId } from '@/models/sales/sales.service';
 import logger from 'lib/logger';
 import _ from 'lodash';
 import {
@@ -148,11 +150,11 @@ export const getCustomerDetailsHandler = async (
       dueDate: new Date(sale.invoiceDate.getTime() + 15 * 24 * 60 * 60 * 1000),
       status:
         sale.dueAmount === 0
-          ? 'Paid'
+          ? InvoiceStatus.PAID
           : sale.dueAmount === sale.totalAmount
-          ? 'Unpaid'
+          ? InvoiceStatus.UNPAID
           : sale.dueAmount > 0
-          ? 'Partial'
+          ? InvoiceStatus.PARTIALLY_PAID
           : 'Overdue',
     }));
 
@@ -251,6 +253,52 @@ export const deleteCustomerHandler = async (
     return res
       .status(200)
       .json({ success: true, message: 'Customer deleted successfully' });
+  } catch (error) {
+    logger(error);
+    return res.status(500).json({
+      success: false,
+      message: 'Something went wrong. Please try again.',
+    });
+  }
+};
+
+/**
+ * Handles fetching customer uppaid invoices
+ */
+export const getCustomerUnpaidInvoicesHandler = async (
+  req: NextApiRequest,
+  res: NextApiResponse
+) => {
+  try {
+    const { id } = req.query;
+
+    if (!id) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Customer ID is required' });
+    }
+
+    const { invoices, stats } = await getUnpaidInvoicesByCustomerId(
+      id as string
+    );
+
+    const formattedInvoices = invoices.map((invoice) => ({
+      id: invoice._id,
+      invoiceNumber: invoice.invoiceNumber,
+      date: invoice.invoiceDate,
+      totalAmount: invoice.totalAmount,
+      customerPaid: invoice.customerPaid,
+      dueAmount: invoice.dueAmount,
+      status: invoice.status,
+    }));
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        invoices: formattedInvoices,
+        stats,
+      },
+    });
   } catch (error) {
     logger(error);
     return res.status(500).json({

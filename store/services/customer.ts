@@ -10,6 +10,7 @@ import {
   CreateCutomerAPIResponse,
   GetAllCustomersAPIResponse,
   GetCustomerDetailsAPIResponse,
+  GetCustomerUnpaidInvoicesAPIResponse,
   UpdateCustomerAPIResponse,
 } from '@/interfaces/response.interface';
 import logger from '@/lib/logger';
@@ -154,6 +155,12 @@ export const customerApi = createApi({
         }
       },
     }),
+    getCustomerUnpaidInvoices: builder.query<
+      GetCustomerUnpaidInvoicesAPIResponse,
+      string
+    >({
+      query: (id) => `/customers?id=${id}&unpaidInvoices=true`,
+    }),
   }),
 });
 
@@ -163,4 +170,5 @@ export const {
   useCreateNewCustomerMutation,
   useDeleteCustomerMutation,
   useUpdateCustomerMutation,
+  useGetCustomerUnpaidInvoicesQuery,
 } = customerApi;

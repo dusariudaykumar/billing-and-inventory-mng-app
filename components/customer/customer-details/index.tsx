@@ -1,8 +1,10 @@
 'use client';
 
+import CustomerRecentSales from '@/components/customer/customer-details/customer-recent-sales';
+import CustomerUnpaidInvoices from '@/components/customer/customer-details/customer-unpaid-invoices';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { currencyFormat } from '@/helpers/currency-format';
 import { useGetCustomerDetailsQuery } from '@/store/services/customer';
 import {
@@ -16,7 +18,6 @@ import {
   MapPin,
   Phone,
 } from 'lucide-react';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 const CustomerDeatils = () => {
@@ -183,67 +184,19 @@ const CustomerDeatils = () => {
           </Card>
         </div>
 
+        {/* Unpaid Invoices*/}
+        {id && (
+          <CustomerUnpaidInvoices
+            customerId={id as string}
+            customerName={data?.name}
+            companyName={data?.companyName}
+          />
+        )}
+
         {/* Recent Sales */}
-        <Card className='bg-white'>
-          <CardHeader className='border-b p-6'>
-            <CardTitle className='text-xl font-semibold text-gray-900'>
-              Recent Sales History
-            </CardTitle>
-          </CardHeader>
-          <CardContent className='p-0'>
-            <div className='overflow-x-auto'>
-              <div className='min-w-full'>
-                <div className='grid grid-cols-6 border-b bg-gray-50 px-6 py-4 text-sm font-medium text-gray-500'>
-                  <div>Invoice ID</div>
-                  <div>Date</div>
-                  {/* <div>Due Date</div> */}
-                  <div>Amount</div>
-                  <div>Customer Paid</div>
-                  <div>Due Amount</div>
-                  <div>Status</div>
-                </div>
-                {data?.recentSales?.map((sale) => (
-                  <div
-                    key={sale.id}
-                    className='grid grid-cols-6 border-b px-6 py-4 text-sm hover:bg-gray-50'
-                  >
-                    <Link
-                      href={`/view-invoice/${sale.id}`}
-                      className='font-medium text-blue-600 underline underline-offset-2'
-                    >
-                      0{sale.invoiceNumber}
-                    </Link>
-                    <div className='text-gray-900'>
-                      {new Date(sale.date).toLocaleDateString('en-GB') || 'N/A'}
-                    </div>
-                    <div className='font-medium text-gray-900'>
-                      {currencyFormat(sale.amount)}
-                    </div>
-                    <div className='text-gray-600'>
-                      {currencyFormat(sale.customerPaid)}
-                    </div>
-                    <div className='font-medium text-gray-900'>
-                      {currencyFormat(sale.dueAmount)}
-                    </div>
-                    <div>
-                      <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                          sale.status === 'Paid'
-                            ? 'bg-green-100 text-green-800'
-                            : sale.status === 'Partial'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-red-100 text-red-800'
-                        }`}
-                      >
-                        {sale.status}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {data?.recentSales && (
+          <CustomerRecentSales recentSales={data.recentSales} />
+        )}
       </div>
     </div>
   );

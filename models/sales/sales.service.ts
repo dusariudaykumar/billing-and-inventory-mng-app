@@ -1,5 +1,5 @@
 import Inventory from '@/models/inventory/inventory.model';
-import { ISales } from '@/models/sales/interface';
+import { InvoiceStatus, ISales } from '@/models/sales/interface';
 import Sales from '@/models/sales/sales.modal';
 import mongoose from 'mongoose';
 
@@ -128,4 +128,36 @@ export const getSalesById = async (id: mongoose.Types.ObjectId) => {
  */
 export const deleteInvoiceById = async (id: mongoose.Types.ObjectId) => {
   return await Sales.findByIdAndUpdate(id, { $set: { isActive: false } });
+};
+
+export const getUnpaidInvoicesByCustomerId = async (customerId: string) => {
+  try {
+    const unpaidInvoices = await Sales.find({
+      customerId: new mongoose.Types.ObjectId(customerId),
+      status: { $in: [InvoiceStatus.UNPAID, InvoiceStatus.PARTIALLY_PAID] },
+      isActive: true,
+    }).sort({ invoiceDate: -1 });
+
+    // Calculate total stats
+    const totalInvoiceAmount = unpaidInvoices.reduce(
+      (sum, invoice) => sum + invoice.totalAmount,
+      0
+    );
+
+    const totalDueAmount = unpaidInvoices.reduce(
+      (sum, invoice) => sum + invoice.dueAmount,
+      0
+    );
+
+    return {
+      invoices: unpaidInvoices,
+      stats: {
+        totalInvoiceAmount,
+        totalDueAmount,
+        invoiceCount: unpaidInvoices.length,
+      },
+    };
+  } catch (error: any) {
+    throw new Error(`Error fetching unpaid invoices: ${error?.message}`);
+  }
 };

@@ -82,7 +82,7 @@ interface CustomerDetails {
     customerPaid: number;
     dueAmount: number;
     dueDate: Date;
-    status: 'Paid' | 'Unpaid' | 'Partial' | 'Overdue';
+    status: InvoiceStatus;
   }>;
 }
 
@@ -200,3 +200,23 @@ export enum Units {
   PIECE = 'Piece',
   KG = 'KG',
 }
+
+interface CutomerUnpaidInvoice {
+  invoices: Array<{
+    id: string;
+    invoiceNumber: string;
+    date: Date;
+    totalAmount: number;
+    customerPaid: number;
+    dueAmount: number;
+    status: string;
+  }>;
+  stats: {
+    totalInvoiceAmount: number;
+    totalDueAmount: number;
+    invoiceCount: number;
+  };
+}
+
+export type GetCustomerUnpaidInvoicesAPIResponse =
+  IResponse<CutomerUnpaidInvoice>;

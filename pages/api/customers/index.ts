@@ -4,6 +4,7 @@ import {
   deleteCustomerHandler,
   getCustomerDetailsHandler,
   getCustomersHandler,
+  getCustomerUnpaidInvoicesHandler,
   updateCustomerHandler,
 } from '@/models/customers/customer.controller';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -11,6 +12,10 @@ import { NextApiRequest, NextApiResponse } from 'next';
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   switch (req.method) {
     case 'GET':
+      if (req.query.id && req.query.unpaidInvoices === 'true') {
+        return getCustomerUnpaidInvoicesHandler(req, res);
+      }
+
       if (req.query.id) {
         return getCustomerDetailsHandler(req, res);
       }
