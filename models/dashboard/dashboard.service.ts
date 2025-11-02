@@ -11,7 +11,6 @@ export const fetchDashboardData = async (storeId: mongoose.Types.ObjectId) => {
   // Get current date and start of current month
   const now = new Date();
   const currentYear = now.getFullYear();
-  const currentMonth = now.getMonth();
 
   // Get all active sales for this store
   const allSales = await Sales.find({ isActive: true, storeId })
@@ -47,10 +46,14 @@ export const fetchDashboardData = async (storeId: mongoose.Types.ObjectId) => {
   const monthlySalesData = await getMonthlySalesData(storeId, currentYear);
 
   // Get revenue status breakdown
-  const revenueStatus = getRevenueStatus(allSales);
+  const revenueStatus = getRevenueStatus(
+    allSales as unknown as PopulatedSaleLean[]
+  );
 
   // Get recent sales
-  const recentSales = getRecentSales(allSales);
+  const recentSales = getRecentSales(
+    allSales as unknown as PopulatedSaleLean[]
+  );
 
   // Get low stock items
   const lowStockItems = await getLowStockItems(storeId);
@@ -167,7 +170,7 @@ const getMonthlySalesData = async (
   ];
 
   // Initialize with zeros
-  const result = months.map((month, index) => ({
+  const result = months.map((month) => ({
     month,
     sales: 0,
     revenue: 0,
@@ -184,9 +187,39 @@ const getMonthlySalesData = async (
 };
 
 /**
+ * Type for populated sales document (with customerId populated) from lean query
+ */
+type PopulatedSaleLean = {
+  _id: mongoose.Types.ObjectId;
+  invoiceNumber: string;
+  customerId?: {
+    name?: string;
+    companyName?: string;
+    contactDetails?: {
+      phone?: string;
+      email?: string | null;
+    };
+  } | null;
+  vehicleNumber?: string | null;
+  invoiceDate: Date | string;
+  items: unknown[];
+  customerPaid: number;
+  totalAmount: number;
+  dueAmount: number;
+  discount?: number;
+  status: string;
+  paymentMethod?: string;
+  notes?: string;
+  storeId: mongoose.Types.ObjectId;
+  isActive: boolean;
+};
+
+/**
  * Get revenue status breakdown
  */
-const getRevenueStatus = (sales) => {
+const getRevenueStatus = (
+  sales: PopulatedSaleLean[]
+): Array<{ name: string; value: number }> => {
   const paid = sales
     .filter((sale) => sale.status === 'Paid')
     .reduce((sum, sale) => sum + sale.totalAmount, 0);
@@ -209,7 +242,16 @@ const getRevenueStatus = (sales) => {
 /**
  * Get recent sales
  */
-const getRecentSales = (sales) => {
+const getRecentSales = (
+  sales: PopulatedSaleLean[]
+): Array<{
+  _id: mongoose.Types.ObjectId;
+  customerInfo: { name: string };
+  invoiceNumber: string;
+  totalAmount: number;
+  status: string;
+  date: Date | string;
+}> => {
   return sales
     .sort(
       (a, b) =>
