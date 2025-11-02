@@ -1,4 +1,5 @@
 import { textToMongoRegExpStatements } from '@/lib/mongo-funs';
+import { convertStoreIdToObjectId } from '@/lib/store-id-helper';
 import { ISupplier } from '@/models/suppliers/interface';
 import * as supplierService from '@/models/suppliers/supplier.service';
 import logger from 'lib/logger';
@@ -13,6 +14,14 @@ export const handleGetSuppliers = async (
   res: NextApiResponse
 ) => {
   try {
+    const storeId = req.query.storeId as string;
+    if (!storeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Store ID is required',
+      });
+    }
+
     let baseQuery: object = {};
     const { page = 1, limit = 10, search } = req.query;
 
@@ -27,7 +36,9 @@ export const handleGetSuppliers = async (
       baseQuery = { $or: searchQuery };
     }
 
+    const storeObjectId = convertStoreIdToObjectId(storeId);
     const suppliers = await supplierService.getAllSuppliers(
+      storeObjectId,
       baseQuery,
       Number(limit),
       Number(page)
@@ -50,6 +61,14 @@ export const handleCreateSupplier = async (
   res: NextApiResponse
 ) => {
   try {
+    const storeId = req.query.storeId as string;
+    if (!storeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Store ID is required',
+      });
+    }
+
     const payload = req.body as ISupplier;
 
     if (
@@ -63,7 +82,10 @@ export const handleCreateSupplier = async (
         .json({ success: false, message: 'Required fields are missing.' });
     }
 
+    const storeObjectId = convertStoreIdToObjectId(storeId);
+
     const isExist = await supplierService.isSupplierExists(
+      storeObjectId,
       payload.name,
       payload.companyName
     );
@@ -74,7 +96,10 @@ export const handleCreateSupplier = async (
         .json({ success: false, message: 'Supplier already exists.' });
     }
 
-    const newSupplier = await supplierService.createSupplier(payload);
+    const newSupplier = await supplierService.createSupplier(
+      storeObjectId,
+      payload
+    );
     return res.status(201).json({
       success: true,
       data: newSupplier,
@@ -97,8 +122,16 @@ export const handleUpdateSupplier = async (
   res: NextApiResponse
 ) => {
   try {
+    const storeId = req.query.storeId as string;
     const { id } = req.query;
     const payload = req.body as Partial<ISupplier>;
+
+    if (!storeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Store ID is required',
+      });
+    }
 
     if (!id || typeof id !== 'string') {
       return res
@@ -106,7 +139,12 @@ export const handleUpdateSupplier = async (
         .json({ success: false, message: 'Invalid ID provided.' });
     }
 
-    const updatedSupplier = await supplierService.updateSupplier(id, payload);
+    const storeObjectId = convertStoreIdToObjectId(storeId);
+    const updatedSupplier = await supplierService.updateSupplier(
+      storeObjectId,
+      id,
+      payload
+    );
 
     if (!updatedSupplier) {
       return res
@@ -136,7 +174,15 @@ export const handleDeleteSupplier = async (
   res: NextApiResponse
 ) => {
   try {
+    const storeId = req.query.storeId as string;
     const { id } = req.query;
+
+    if (!storeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Store ID is required',
+      });
+    }
 
     if (!id || typeof id !== 'string') {
       return res
@@ -144,7 +190,11 @@ export const handleDeleteSupplier = async (
         .json({ success: false, message: 'Invalid ID provided.' });
     }
 
-    const deletedSupplier = await supplierService.deleteSupplier(id);
+    const storeObjectId = convertStoreIdToObjectId(storeId);
+    const deletedSupplier = await supplierService.deleteSupplier(
+      storeObjectId,
+      id
+    );
 
     if (!deletedSupplier) {
       return res

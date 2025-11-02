@@ -26,6 +26,12 @@ const inventorySchema = new mongoose.Schema<InventoryDoc, InventoryModel>(
       type: String,
       required: true,
     },
+    storeId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Stores',
+      required: true,
+      index: true,
+    },
     isActive: {
       type: Boolean,
       required: false,
@@ -36,6 +42,9 @@ const inventorySchema = new mongoose.Schema<InventoryDoc, InventoryModel>(
     timestamps: true,
   }
 );
+
+// Compound index for efficient filtering
+inventorySchema.index({ storeId: 1, isActive: 1 });
 
 const Inventory =
   (mongoose.models.Inventorys as InventoryModel) ||

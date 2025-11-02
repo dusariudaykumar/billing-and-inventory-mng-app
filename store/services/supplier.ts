@@ -1,6 +1,6 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 
-import { baseQuery } from '@/store/base-query';
+import { customBaseQuery } from '@/store/base-query';
 
 import { BasicQueryParams } from '@/interfaces/payload.interface';
 import {
@@ -14,7 +14,7 @@ import logger from '@/lib/logger';
 
 export const supplierApi = createApi({
   reducerPath: 'supplier',
-  baseQuery: baseQuery,
+  baseQuery: customBaseQuery,
   tagTypes: ['suppliers'],
   endpoints: (builder) => ({
     getAllSuppliers: builder.query<

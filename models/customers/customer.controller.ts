@@ -1,5 +1,6 @@
 import { InvoiceStatus } from '@/interfaces/response.interface';
 import { textToMongoRegExpStatements } from '@/lib/mongo-funs';
+import { convertStoreIdToObjectId } from '@/lib/store-id-helper';
 import Sales from '@/models/sales/sales.modal';
 import { getUnpaidInvoicesByCustomerId } from '@/models/sales/sales.service';
 import logger from 'lib/logger';
@@ -24,6 +25,15 @@ export const getCustomersHandler = async (
   res: NextApiResponse
 ) => {
   try {
+    const storeId = req.query.storeId as string;
+    if (!storeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Store ID is required',
+      });
+    }
+
+    const storeObjectId = convertStoreIdToObjectId(storeId);
     let baseQuery: object = {};
     const { page = 1, limit = 10, search } = req.query;
 
@@ -39,6 +49,7 @@ export const getCustomersHandler = async (
     }
 
     const customers = await getAllCustomers(
+      storeObjectId,
       baseQuery,
       Number(limit),
       Number(page)
@@ -61,6 +72,14 @@ export const createCustomerHandler = async (
   res: NextApiResponse
 ) => {
   try {
+    const storeId = req.query.storeId as string;
+    if (!storeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Store ID is required',
+      });
+    }
+
     const payload = req.body as ICustomer;
 
     if (
@@ -74,11 +93,17 @@ export const createCustomerHandler = async (
         .send({ success: false, message: 'Required fields are missing' });
     }
 
+    const storeObjectId = convertStoreIdToObjectId(storeId);
+
     // Check if customer already exists
-    const isExist = await isCustomerExists(payload.name, payload.companyName);
+    const isExist = await isCustomerExists(
+      storeObjectId,
+      payload.name,
+      payload.companyName
+    );
 
     if (!isExist) {
-      const newCustomer = await createCustomer(payload);
+      const newCustomer = await createCustomer(storeObjectId, payload);
       return res.status(201).send({ success: true, data: newCustomer });
     }
 
@@ -102,7 +127,15 @@ export const getCustomerDetailsHandler = async (
   res: NextApiResponse
 ) => {
   try {
+    const storeId = req.query.storeId as string;
     const { id } = req.query;
+
+    if (!storeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Store ID is required',
+      });
+    }
 
     if (!id) {
       return res
@@ -110,8 +143,10 @@ export const getCustomerDetailsHandler = async (
         .json({ success: false, message: 'Customer ID is required' });
     }
 
+    const storeObjectId = convertStoreIdToObjectId(storeId);
+
     // Get customer basic information
-    const customer = await getCustomerById(id as string);
+    const customer = await getCustomerById(storeObjectId, id as string);
     if (!customer) {
       return res
         .status(404)
@@ -120,6 +155,7 @@ export const getCustomerDetailsHandler = async (
 
     // Get customer's sales history
     const sales = await Sales.find({
+      storeId: storeObjectId,
       customerId: new mongoose.Types.ObjectId(id as string),
       isActive: true,
     })
@@ -128,6 +164,7 @@ export const getCustomerDetailsHandler = async (
 
     // Calculate customer statistics
     const allSales = await Sales.find({
+      storeId: storeObjectId,
       customerId: new mongoose.Types.ObjectId(id as string),
       isActive: true,
     });
@@ -199,8 +236,16 @@ export const updateCustomerHandler = async (
   res: NextApiResponse
 ) => {
   try {
+    const storeId = req.query.storeId as string;
     const { id } = req.query;
     const payload = req.body as Partial<ICustomer>;
+
+    if (!storeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Store ID is required',
+      });
+    }
 
     if (!id) {
       return res
@@ -208,14 +253,20 @@ export const updateCustomerHandler = async (
         .json({ success: false, message: 'Customer ID is required' });
     }
 
-    const existingCustomer = await getCustomerById(id as string);
+    const storeObjectId = convertStoreIdToObjectId(storeId);
+
+    const existingCustomer = await getCustomerById(storeObjectId, id as string);
     if (!existingCustomer) {
       return res
         .status(404)
         .json({ success: false, message: 'Customer not found' });
     }
 
-    const updatedCustomer = await updateCustomer(id as string, payload);
+    const updatedCustomer = await updateCustomer(
+      storeObjectId,
+      id as string,
+      payload
+    );
     return res.status(200).json({ success: true, data: updatedCustomer });
   } catch (error) {
     logger(error);
@@ -234,7 +285,15 @@ export const deleteCustomerHandler = async (
   res: NextApiResponse
 ) => {
   try {
+    const storeId = req.query.storeId as string;
     const { id } = req.query;
+
+    if (!storeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Store ID is required',
+      });
+    }
 
     if (!id) {
       return res
@@ -242,14 +301,16 @@ export const deleteCustomerHandler = async (
         .json({ success: false, message: 'Customer ID is required' });
     }
 
-    const existingCustomer = await getCustomerById(id as string);
+    const storeObjectId = convertStoreIdToObjectId(storeId);
+
+    const existingCustomer = await getCustomerById(storeObjectId, id as string);
     if (!existingCustomer) {
       return res
         .status(404)
         .json({ success: false, message: 'Customer not found' });
     }
 
-    await deleteCustomer(id as string);
+    await deleteCustomer(storeObjectId, id as string);
     return res
       .status(200)
       .json({ success: true, message: 'Customer deleted successfully' });
@@ -270,7 +331,15 @@ export const getCustomerUnpaidInvoicesHandler = async (
   res: NextApiResponse
 ) => {
   try {
+    const storeId = req.query.storeId as string;
     const { id } = req.query;
+
+    if (!storeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Store ID is required',
+      });
+    }
 
     if (!id) {
       return res
@@ -278,7 +347,10 @@ export const getCustomerUnpaidInvoicesHandler = async (
         .json({ success: false, message: 'Customer ID is required' });
     }
 
+    const storeObjectId = convertStoreIdToObjectId(storeId);
+
     const { invoices, stats } = await getUnpaidInvoicesByCustomerId(
+      storeObjectId,
       id as string
     );
 

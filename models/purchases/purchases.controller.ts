@@ -1,3 +1,4 @@
+import { convertStoreIdToObjectId } from '@/lib/store-id-helper';
 import { NextApiRequest, NextApiResponse } from 'next';
 import {
   createPurchase,
@@ -15,6 +16,14 @@ export const handleCreatePurchase = async (
   res: NextApiResponse
 ) => {
   try {
+    const storeId = req.query.storeId as string;
+    if (!storeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Store ID is required',
+      });
+    }
+
     const payload = req.body;
 
     if (
@@ -29,7 +38,8 @@ export const handleCreatePurchase = async (
         .json({ success: false, message: 'Required fields are missing.' });
     }
 
-    const purchase = await createPurchase(payload);
+    const storeObjectId = convertStoreIdToObjectId(storeId);
+    const purchase = await createPurchase(storeObjectId, payload);
     return res.status(201).json({ success: true, data: purchase });
   } catch (error) {
     return res.status(500).json({
@@ -47,8 +57,21 @@ export const handleGetPurchases = async (
   res: NextApiResponse
 ) => {
   try {
+    const storeId = req.query.storeId as string;
+    if (!storeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Store ID is required',
+      });
+    }
+
+    const storeObjectId = convertStoreIdToObjectId(storeId);
     const { page = 1, limit = 10 } = req.query;
-    const purchases = await getAllPurchases(Number(limit), Number(page));
+    const purchases = await getAllPurchases(
+      storeObjectId,
+      Number(limit),
+      Number(page)
+    );
     return res.status(200).json({ success: true, data: purchases });
   } catch (error) {
     return res.status(500).json({
@@ -66,13 +89,23 @@ export const handleGetPurchaseById = async (
   res: NextApiResponse
 ) => {
   try {
+    const storeId = req.query.storeId as string;
     const { id } = req.query;
+
+    if (!storeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Store ID is required',
+      });
+    }
+
     if (!id)
       return res
         .status(400)
         .json({ success: false, message: 'Purchase ID is required' });
 
-    const purchase = await getPurchaseById(id as string);
+    const storeObjectId = convertStoreIdToObjectId(storeId);
+    const purchase = await getPurchaseById(storeObjectId, id as string);
     if (!purchase)
       return res
         .status(404)
@@ -95,15 +128,28 @@ export const handleUpdatePurchase = async (
   res: NextApiResponse
 ) => {
   try {
+    const storeId = req.query.storeId as string;
     const { id } = req.query;
     const payload = req.body;
+
+    if (!storeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Store ID is required',
+      });
+    }
 
     if (!id)
       return res
         .status(400)
         .json({ success: false, message: 'Purchase ID is required' });
 
-    const updatedPurchase = await updatePurchase(id as string, payload);
+    const storeObjectId = convertStoreIdToObjectId(storeId);
+    const updatedPurchase = await updatePurchase(
+      storeObjectId,
+      id as string,
+      payload
+    );
     if (!updatedPurchase)
       return res
         .status(404)
@@ -126,13 +172,23 @@ export const handleDeletePurchase = async (
   res: NextApiResponse
 ) => {
   try {
+    const storeId = req.query.storeId as string;
     const { id } = req.query;
+
+    if (!storeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Store ID is required',
+      });
+    }
+
     if (!id)
       return res
         .status(400)
         .json({ success: false, message: 'Purchase ID is required' });
 
-    const deletedPurchase = await deletePurchase(id as string);
+    const storeObjectId = convertStoreIdToObjectId(storeId);
+    const deletedPurchase = await deletePurchase(storeObjectId, id as string);
     if (!deletedPurchase)
       return res
         .status(404)

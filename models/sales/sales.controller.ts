@@ -1,5 +1,6 @@
 import logger from '@/lib/logger';
 import { textToMongoRegExpStatements } from '@/lib/mongo-funs';
+import { convertStoreIdToObjectId } from '@/lib/store-id-helper';
 import Inventory from '@/models/inventory/inventory.model';
 import { ISales } from '@/models/sales/interface';
 import _ from 'lodash';
@@ -15,6 +16,14 @@ export const handleGetSales = async (
   res: NextApiResponse
 ) => {
   try {
+    const storeId = req.query.storeId as string;
+    if (!storeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Store ID is required',
+      });
+    }
+
     let baseQuery: object = {};
     const { page = 1, limit = 10, search } = req.query;
 
@@ -34,7 +43,9 @@ export const handleGetSales = async (
       };
     }
 
+    const storeObjectId = convertStoreIdToObjectId(storeId);
     const salesData = await salesService.getAllSales(
+      storeObjectId,
       baseQuery,
       Number(limit),
       Number(page)
@@ -57,15 +68,25 @@ export const handleGetInvoice = async (
   res: NextApiResponse
 ) => {
   try {
+    const storeId = req.query.storeId as string;
     const { id } = req.query;
+
+    if (!storeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Store ID is required',
+      });
+    }
+
     if (!id || typeof id !== 'string') {
       return res
         .status(400)
         .json({ success: false, message: 'Invalid ID provided.' });
     }
 
+    const storeObjectId = convertStoreIdToObjectId(storeId);
     const objId = new mongoose.Types.ObjectId(id);
-    const sales = await salesService.getSalesById(objId);
+    const sales = await salesService.getSalesById(storeObjectId, objId);
 
     if (!sales) {
       return res
@@ -91,6 +112,14 @@ export const handleCreateInvoice = async (
   res: NextApiResponse
 ) => {
   try {
+    const storeId = req.query.storeId as string;
+    if (!storeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Store ID is required',
+      });
+    }
+
     const payload = req.body as ISales;
     if (!payload || !payload.items?.length || !payload.customerId) {
       return res
@@ -98,7 +127,8 @@ export const handleCreateInvoice = async (
         .json({ success: false, message: 'Required fields are missing.' });
     }
 
-    const invoice = await salesService.createInvoice(payload);
+    const storeObjectId = convertStoreIdToObjectId(storeId);
+    const invoice = await salesService.createInvoice(storeObjectId, payload);
     return res.status(201).json({
       success: true,
       data: invoice,
@@ -121,8 +151,16 @@ export const handleUpdateInvoice = async (
   res: NextApiResponse
 ) => {
   try {
+    const storeId = req.query.storeId as string;
     const { id } = req.query;
     const payload = req.body as Partial<ISales>;
+
+    if (!storeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Store ID is required',
+      });
+    }
 
     if (!id || typeof id !== 'string') {
       return res
@@ -130,10 +168,14 @@ export const handleUpdateInvoice = async (
         .json({ success: false, message: 'Invalid ID provided.' });
     }
 
+    const storeObjectId = convertStoreIdToObjectId(storeId);
     const objId = new mongoose.Types.ObjectId(id);
 
     // Fetch the existing invoice
-    const existingInvoice = await salesService.getSalesById(objId);
+    const existingInvoice = await salesService.getSalesById(
+      storeObjectId,
+      objId
+    );
     if (!existingInvoice) {
       return res
         .status(404)
@@ -169,7 +211,11 @@ export const handleUpdateInvoice = async (
     }
 
     // Update the invoice
-    const updatedInvoice = await salesService.updateInvoiceById(objId, payload);
+    const updatedInvoice = await salesService.updateInvoiceById(
+      storeObjectId,
+      objId,
+      payload
+    );
     return res.status(200).json({
       success: true,
       data: updatedInvoice,
@@ -191,7 +237,15 @@ export const handleDeleteInvoiceById = async (
   res: NextApiResponse
 ) => {
   try {
+    const storeId = req.query.storeId as string;
     const { id } = req.query;
+
+    if (!storeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Store ID is required',
+      });
+    }
 
     if (!id || typeof id !== 'string') {
       return res
@@ -199,8 +253,12 @@ export const handleDeleteInvoiceById = async (
         .json({ success: false, message: 'Invalid ID provided.' });
     }
 
+    const storeObjectId = convertStoreIdToObjectId(storeId);
     const objId = new mongoose.Types.ObjectId(id);
-    const deletedInvoice = await salesService.deleteInvoiceById(objId);
+    const deletedInvoice = await salesService.deleteInvoiceById(
+      storeObjectId,
+      objId
+    );
 
     if (!deletedInvoice) {
       return res

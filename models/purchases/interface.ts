@@ -6,6 +6,7 @@ export interface IPurchases {
   amountPaid: number;
   totalCost: number;
   dueAmount: number;
+  storeId: mongoose.Types.ObjectId;
   isActive: boolean;
 }
 

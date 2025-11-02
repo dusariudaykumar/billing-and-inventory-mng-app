@@ -6,12 +6,17 @@ import mongoose from 'mongoose';
 /**
  * Fetch paginated sales records with working search filter.
  */
-export const getAllSales = async (query: any, limit: number, page: number) => {
+export const getAllSales = async (
+  storeId: mongoose.Types.ObjectId,
+  query: any,
+  limit: number,
+  page: number
+) => {
   try {
     const skip = (page - 1) * limit;
 
     const pipeline: mongoose.PipelineStage[] = [
-      { $match: { isActive: true } },
+      { $match: { isActive: true, storeId } },
       {
         $lookup: {
           from: 'customers',
@@ -56,7 +61,10 @@ export const getAllSales = async (query: any, limit: number, page: number) => {
 /**
  * Create an invoice and update inventory accordingly.
  */
-export const createInvoice = async (payload: ISales) => {
+export const createInvoice = async (
+  storeId: mongoose.Types.ObjectId,
+  payload: ISales
+) => {
   try {
     const { customerId, items, ...info } = payload;
 
@@ -75,10 +83,10 @@ export const createInvoice = async (payload: ISales) => {
       };
     });
 
-    // Update inventory in bulk
+    // Update inventory in bulk (filtered by storeId)
     const bulkUpdates = formattedItems.map((item) => ({
       updateOne: {
-        filter: { _id: item.itemId },
+        filter: { _id: item.itemId, storeId },
         update: { $inc: { quantity: -item.quantity } },
       },
     }));
@@ -90,6 +98,7 @@ export const createInvoice = async (payload: ISales) => {
     const invoice = await Sales.create({
       customerId: formattedCustomerId,
       items: formattedItems,
+      storeId,
       ...info,
     });
     return invoice;
@@ -102,18 +111,25 @@ export const createInvoice = async (payload: ISales) => {
  * Updates an invoice by ID.
  */
 export const updateInvoiceById = async (
+  storeId: mongoose.Types.ObjectId,
   id: mongoose.Types.ObjectId,
   payload: Partial<ISales>
 ) => {
-  return await Sales.findByIdAndUpdate(id, payload, {
+  return await Sales.findOneAndUpdate({ _id: id, storeId }, payload, {
     new: true,
     runValidators: true,
   });
 };
 
-export const getSalesById = async (id: mongoose.Types.ObjectId) => {
+export const getSalesById = async (
+  storeId: mongoose.Types.ObjectId,
+  id: mongoose.Types.ObjectId
+) => {
   try {
-    const sales = await Sales.findOne({ _id: id }).populate({
+    const sales = await Sales.findOne({
+      _id: id,
+      storeId,
+    }).populate({
       path: 'customerId',
       select: '-createdAt -updatedAt -__v',
     });
@@ -126,13 +142,23 @@ export const getSalesById = async (id: mongoose.Types.ObjectId) => {
 /**
  * Deletes an invoice by ID.
  */
-export const deleteInvoiceById = async (id: mongoose.Types.ObjectId) => {
-  return await Sales.findByIdAndUpdate(id, { $set: { isActive: false } });
+export const deleteInvoiceById = async (
+  storeId: mongoose.Types.ObjectId,
+  id: mongoose.Types.ObjectId
+) => {
+  return await Sales.findOneAndUpdate(
+    { _id: id, storeId },
+    { $set: { isActive: false } }
+  );
 };
 
-export const getUnpaidInvoicesByCustomerId = async (customerId: string) => {
+export const getUnpaidInvoicesByCustomerId = async (
+  storeId: mongoose.Types.ObjectId,
+  customerId: string
+) => {
   try {
     const unpaidInvoices = await Sales.find({
+      storeId,
       customerId: new mongoose.Types.ObjectId(customerId),
       status: { $in: [InvoiceStatus.UNPAID, InvoiceStatus.PARTIALLY_PAID] },
       isActive: true,

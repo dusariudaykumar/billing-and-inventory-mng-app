@@ -2,7 +2,7 @@ import { createApi } from '@reduxjs/toolkit/query/react';
 
 import { appendQueryParams } from '@/lib/helper';
 
-import { baseQuery } from '@/store/base-query';
+import { customBaseQuery } from '@/store/base-query';
 
 import { BasicQueryParams } from '@/interfaces/payload.interface';
 import {
@@ -17,7 +17,7 @@ import logger from '@/lib/logger';
 
 export const customerApi = createApi({
   reducerPath: 'customer',
-  baseQuery: baseQuery,
+  baseQuery: customBaseQuery,
   tagTypes: ['customers'],
   endpoints: (builder) => ({
     getAllCustomers: builder.query<

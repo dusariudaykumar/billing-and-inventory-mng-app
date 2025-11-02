@@ -220,3 +220,66 @@ interface CutomerUnpaidInvoice {
 
 export type GetCustomerUnpaidInvoicesAPIResponse =
   IResponse<CutomerUnpaidInvoice>;
+
+// Dashboard
+
+export interface DashboardStats {
+  totalRevenue: number;
+  totalDue: number;
+  totalCustomers: number;
+  totalItems: number;
+}
+
+export interface CustomerWithDues {
+  id: string;
+  name: string;
+  companyName: string;
+  contactInfo: {
+    phone: string;
+    email: string | null;
+  };
+  dueAmount: number;
+  invoiceCount: number;
+  lastInvoiceDate: string | Date;
+}
+
+export interface RecentSale {
+  _id: string;
+  customerInfo: {
+    name: string;
+  };
+  invoiceNumber: string;
+  totalAmount: number;
+  status: string;
+  date: string | Date;
+}
+
+export interface LowStockItem {
+  _id: string;
+  name: string;
+  units: string;
+  quantity: number;
+  sellingPrice: number;
+}
+
+export interface MonthlySalesData {
+  month: string;
+  sales: number;
+  revenue: number;
+}
+
+export interface RevenueStatus {
+  name: string;
+  value: number;
+}
+
+export interface DashboardData {
+  stats: DashboardStats;
+  customersWithDues: CustomerWithDues[];
+  monthlySalesData: MonthlySalesData[];
+  revenueStatus: RevenueStatus[];
+  recentSales: RecentSale[];
+  lowStockItems: LowStockItem[];
+}
+
+export type GetDashboardAPIResponse = IResponse<DashboardData>;

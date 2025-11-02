@@ -1,4 +1,4 @@
-import { Document, Model } from 'mongoose';
+import mongoose, { Document, Model } from 'mongoose';
 
 export interface Inventory {
   name: string;
@@ -6,6 +6,7 @@ export interface Inventory {
   quantity: number;
   units: string;
   purchasePrice: number;
+  storeId: mongoose.Types.ObjectId;
   isActive: boolean;
 }
 

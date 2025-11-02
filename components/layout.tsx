@@ -4,6 +4,7 @@ import { Separator } from '@radix-ui/react-separator';
 import * as React from 'react';
 
 import { AppSidebar } from '@/components/sidebar/sidebar';
+import { StoreInitializer } from '@/components/store-initializer';
 import {
   SidebarInset,
   SidebarProvider,
@@ -15,6 +16,7 @@ import ProtectedRoute from '@/routes/protected-route';
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <ProtectedRoute>
+      <StoreInitializer />
       <SidebarProvider>
         <div className='flex h-screen w-screen'>
           <AppSidebar />

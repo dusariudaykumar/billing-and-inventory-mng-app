@@ -56,6 +56,12 @@ const salesSchema = new mongoose.Schema<ISalesDoc, ISalesModel>(
       type: String,
       required: false,
     },
+    storeId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Stores',
+      required: true,
+      index: true,
+    },
     isActive: {
       type: Boolean,
       required: false,
@@ -66,6 +72,9 @@ const salesSchema = new mongoose.Schema<ISalesDoc, ISalesModel>(
     timestamps: true,
   }
 );
+
+// Compound index for efficient filtering
+salesSchema.index({ storeId: 1, isActive: 1 });
 
 const Sales =
   (mongoose.models.Sales as ISalesModel) ||

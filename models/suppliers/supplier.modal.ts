@@ -17,6 +17,12 @@ const supplierSchema = new mongoose.Schema<ISupplierDoc, ISupplierModal>(
     contactDetails: {
       type: Object,
     },
+    storeId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Stores',
+      required: true,
+      index: true,
+    },
     isActive: {
       type: Boolean,
       required: false,
@@ -27,6 +33,9 @@ const supplierSchema = new mongoose.Schema<ISupplierDoc, ISupplierModal>(
     timestamps: true,
   }
 );
+
+// Compound index for efficient filtering
+supplierSchema.index({ storeId: 1, isActive: 1 });
 
 const Supplier =
   (mongoose.models.Suppliers as ISupplierModal) ||

@@ -10,6 +10,7 @@ export interface BasicQueryParams {
   page?: number;
   limit?: number;
   search?: string;
+  storeId?: string; // Auto-injected by base query, but available for explicit use
 }
 
 export interface CreateInvoicePayload {

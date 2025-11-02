@@ -15,8 +15,10 @@ import {
 import { Box, IndianRupee, LayoutDashboard, Truck, Users } from 'lucide-react';
 import * as React from 'react';
 
+import { StoreSelector } from '@/components/store-selector';
 import { useAppSelector } from '@/store/hooks';
 import { getUserData } from '@/store/slice/authSlice';
+import Link from 'next/link';
 
 const data = {
   user: {
@@ -27,7 +29,7 @@ const data = {
   dashboard: [
     {
       name: 'Dashboard',
-      url: '#',
+      url: '/',
       icon: LayoutDashboard,
     },
   ],
@@ -70,7 +72,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size='lg' asChild>
-              <a href='#'>
+              <Link href='/'>
                 <div className='bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg'>
                   <Avatar className='h-8 w-8 rounded-lg'>
                     <AvatarImage src='/srd-logo.webp' alt='logo' />
@@ -80,8 +82,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <span className='truncate font-semibold'>SRD Pvt</span>
                   <span className='truncate text-xs'>Enterprise</span>
                 </div>
-              </a>
+              </Link>
             </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <div className='px-2 py-2'>
+              <StoreSelector />
+            </div>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>

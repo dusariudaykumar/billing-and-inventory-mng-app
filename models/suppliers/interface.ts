@@ -1,9 +1,10 @@
-import { Document, Model } from 'mongoose';
+import mongoose, { Document, Model } from 'mongoose';
 
 export interface ISupplier {
   name: string;
   companyName: string;
   contactDetails: ContactDetails;
+  storeId: mongoose.Types.ObjectId;
   isActive: boolean;
 }
 export interface ContactDetails {

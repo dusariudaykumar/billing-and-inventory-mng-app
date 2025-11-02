@@ -1,10 +1,11 @@
-import { Document, Model } from 'mongoose';
+import mongoose, { Document, Model } from 'mongoose';
 
 export interface ICustomer {
   name: string;
   companyName: string;
   contactDetails: ContactDetails;
   customerID: string;
+  storeId: mongoose.Types.ObjectId;
   isActive: boolean;
 }
 

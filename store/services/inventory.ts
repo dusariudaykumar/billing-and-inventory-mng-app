@@ -2,7 +2,7 @@ import { createApi } from '@reduxjs/toolkit/query/react';
 
 import { appendQueryParams } from '@/lib/helper';
 
-import { baseQuery } from '@/store/base-query';
+import { customBaseQuery } from '@/store/base-query';
 
 import { BasicQueryParams } from '@/interfaces/payload.interface';
 import {
@@ -15,7 +15,7 @@ import logger from '@/lib/logger';
 
 export const inventoryApi = createApi({
   reducerPath: 'inventory',
-  baseQuery: baseQuery,
+  baseQuery: customBaseQuery,
   tagTypes: ['items'],
   endpoints: (builder) => ({
     getAllItemsFromInventory: builder.query<

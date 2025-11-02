@@ -9,13 +9,13 @@ import {
 } from '@/interfaces/response.interface';
 import { appendQueryParams } from '@/lib/helper';
 import logger from '@/lib/logger';
-import { baseQuery } from '@/store/base-query';
+import { customBaseQuery } from '@/store/base-query';
 import { createApi } from '@reduxjs/toolkit/query/react';
 
 export const salesApi = createApi({
   reducerPath: 'sales',
   tagTypes: ['sales', 'invoice'],
-  baseQuery: baseQuery,
+  baseQuery: customBaseQuery,
   endpoints: (builder) => ({
     getAllSales: builder.query<GetAllSalesAPIResponse, BasicQueryParams>({
       query: (params) => ({

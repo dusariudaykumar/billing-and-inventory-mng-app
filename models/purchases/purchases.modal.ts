@@ -31,6 +31,12 @@ const purchasesSchema = new mongoose.Schema<IPurchasesDoc, IPurchasesModel>(
       type: Number,
       required: true,
     },
+    storeId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Stores',
+      required: true,
+      index: true,
+    },
     isActive: {
       type: Boolean,
       required: false,
@@ -39,6 +45,9 @@ const purchasesSchema = new mongoose.Schema<IPurchasesDoc, IPurchasesModel>(
   },
   { timestamps: true }
 );
+
+// Compound index for efficient filtering
+purchasesSchema.index({ storeId: 1, isActive: 1 });
 
 const Purchases =
   (mongoose.models.Purchases as IPurchasesModel) ||

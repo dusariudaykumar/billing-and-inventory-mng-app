@@ -22,6 +22,12 @@ const customerSchema = new mongoose.Schema<ICustomerDoc, ICustomerModel>(
       type: Object,
       required: false,
     },
+    storeId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Stores',
+      required: true,
+      index: true,
+    },
     isActive: {
       type: Boolean,
       required: false,
@@ -32,6 +38,9 @@ const customerSchema = new mongoose.Schema<ICustomerDoc, ICustomerModel>(
     timestamps: true,
   }
 );
+
+// Compound index for efficient filtering
+customerSchema.index({ storeId: 1, isActive: 1 });
 
 const Customer =
   (mongoose.models.Customers as ICustomerModel) ||

@@ -13,6 +13,7 @@ export interface ISales {
   status: InvoiceStatus;
   paymentMethod: PaymentMethods;
   notes: string;
+  storeId: mongoose.Types.ObjectId;
   isActive: boolean;
 }
 

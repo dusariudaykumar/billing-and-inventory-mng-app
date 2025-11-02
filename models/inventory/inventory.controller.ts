@@ -1,4 +1,5 @@
 import { textToMongoRegExpStatements } from '@/lib/mongo-funs';
+import { convertStoreIdToObjectId } from '@/lib/store-id-helper';
 import { Inventory as InventoryInterface } from '@/models/inventory/interface';
 import {
   addNewItemToInventory,
@@ -20,6 +21,14 @@ export const getInventoryHandler = async (
   res: NextApiResponse
 ) => {
   try {
+    const storeId = req.query.storeId as string;
+    if (!storeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Store ID is required',
+      });
+    }
+
     let baseQuery: object = {};
     const { page = 1, limit = 10, search } = req.query;
 
@@ -38,7 +47,9 @@ export const getInventoryHandler = async (
       };
     }
 
+    const storeObjectId = convertStoreIdToObjectId(storeId);
     const inventory = await getAllItemsFromInventory(
+      storeObjectId,
       baseQuery,
       Number(page),
       Number(limit)
@@ -75,11 +86,21 @@ export const addInventoryItemHandler = async (
         .send({ success: false, message: 'Required fields are missing.' });
     }
 
+    const storeId = req.query.storeId as string;
+    if (!storeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Store ID is required',
+      });
+    }
+
+    const storeObjectId = convertStoreIdToObjectId(storeId);
+
     // Check if item already exists in the inventory
-    const isExist = await isInventoryItemExists(payload.name);
+    const isExist = await isInventoryItemExists(storeObjectId, payload.name);
 
     if (!isExist) {
-      const item = await addNewItemToInventory(payload);
+      const item = await addNewItemToInventory(storeObjectId, payload);
       return res.status(201).send({
         success: true,
         data: item,
@@ -107,8 +128,16 @@ export const updateInventoryItemHandler = async (
   res: NextApiResponse
 ) => {
   try {
+    const storeId = req.query.storeId as string;
     const { id } = req.query;
     const payload = req.body;
+
+    if (!storeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Store ID is required',
+      });
+    }
 
     if (!id || typeof id !== 'string')
       return res.status(400).json({
@@ -116,10 +145,11 @@ export const updateInventoryItemHandler = async (
         message: 'Invalid ID.',
       });
 
+    const storeObjectId = convertStoreIdToObjectId(storeId);
     const objId = new mongoose.Types.ObjectId(id as string);
 
     // Check if item exists
-    const existingItem = await getInventoryItemById(objId);
+    const existingItem = await getInventoryItemById(storeObjectId, objId);
     if (!existingItem) {
       return res.status(404).json({
         success: false,
@@ -128,7 +158,11 @@ export const updateInventoryItemHandler = async (
     }
 
     // Update the item
-    const updatedItem = await updateInventoryItem(objId, payload);
+    const updatedItem = await updateInventoryItem(
+      storeObjectId,
+      objId,
+      payload
+    );
     return res.status(200).json({
       success: true,
       data: updatedItem,
@@ -148,14 +182,24 @@ export const deleteInventoryItemByIdHandler = async (
   res: NextApiResponse
 ) => {
   try {
+    const storeId = req.query.storeId as string;
     const { id } = req.query;
+
+    if (!storeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Store ID is required',
+      });
+    }
+
     if (!id || typeof id !== 'string')
       return res.status(400).json({
         success: false,
         message: 'Invaild ID.',
       });
+    const storeObjectId = convertStoreIdToObjectId(storeId);
     const objId = new mongoose.Types.ObjectId(id as string);
-    await deleteInventoryItemById(objId);
+    await deleteInventoryItemById(storeObjectId, objId);
     return res
       .status(200)
       .json({ success: true, message: 'Item removed successfully.' });
