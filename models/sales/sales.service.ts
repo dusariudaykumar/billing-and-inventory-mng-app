@@ -98,8 +98,8 @@ export const createInvoice = async (
     const invoice = await Sales.create({
       customerId: formattedCustomerId,
       items: formattedItems,
-      storeId,
       ...info,
+      storeId,
     });
     return invoice;
   } catch (error: any) {
