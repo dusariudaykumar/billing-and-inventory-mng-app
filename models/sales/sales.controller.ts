@@ -31,6 +31,7 @@ export const handleGetSales = async (
       'customerInfo.name',
       'customerInfo.email',
       'customerInfo.phone',
+      'invoiceNumber',
     ];
 
     if (typeof search === 'string') {

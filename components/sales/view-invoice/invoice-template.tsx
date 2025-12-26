@@ -356,7 +356,7 @@ const InvoiceTemplate: React.FC = () => {
                       ></td>
                       <td className='flex items-center justify-end px-2 py-2 pt-0 text-right text-sm font-medium sm:px-4'>
                         <Minus className='h-3 w-3 sm:h-4 sm:w-4' />{' '}
-                        {data.discount
+                        {data.customerPaid
                           ? currencyFormat(data.customerPaid)
                           : '---'}
                       </td>
