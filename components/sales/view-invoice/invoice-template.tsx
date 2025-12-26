@@ -3,12 +3,17 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { currencyFormat } from '@/helpers/currency-format';
+import { generateWhatsAppLink } from '@/helpers/whatsapp-share';
 import { useGetInvoiceQuery } from '@/store/services/sales';
-import { ArrowLeft, Minus, Printer } from 'lucide-react';
+import axios from 'axios';
+import { toPng } from 'html-to-image';
+import { ArrowLeft, MessageCircle, Minus, Printer } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
+import { toast } from 'sonner';
 
+import logger from '@/lib/logger';
 import { useReactToPrint } from 'react-to-print';
 
 const InvoiceTemplate: React.FC = () => {
@@ -19,11 +24,106 @@ const InvoiceTemplate: React.FC = () => {
     skip: !id,
   });
   const { data } = invoiceData || {};
+  const [isSharing, setIsSharing] = useState(false);
 
   const handlePrintInvoice = useReactToPrint({
     contentRef: printContentRef,
     documentTitle: `SRD_INVOICE_${data?.invoiceNumber}`,
   });
+
+  const handleShareViaWhatsApp = async () => {
+    if (!printContentRef.current || !data) {
+      toast.error('Invoice data not available');
+      return;
+    }
+
+    setIsSharing(true);
+    try {
+      // Create a clone of the invoices to render for PDF
+      // Create a clone of the invoices to render for PDF
+      const originalElement = printContentRef.current;
+      const clone = originalElement.cloneNode(true) as HTMLElement;
+
+      // Set fixed dimensions and styles for the clone to ensure perfect PDF rendering
+      clone.style.width = '1000px';
+      clone.style.minWidth = '1000px';
+      clone.style.position = 'absolute';
+      clone.style.left = '0'; // Move into viewport but hide with z-index
+      clone.style.top = '0';
+      clone.style.zIndex = '-1000';
+      clone.style.backgroundColor = '#ffffff';
+
+      // FORCE DESKTOP LAYOUT (Clean Snapshot Method)
+      // We rely on html2canvas windowWidth: 1200 to enforce the desktop media queries.
+      // No manual style overrides are applied to ensure "What You See Is What You Get".
+
+      (clone as HTMLElement).style.width = '1000px';
+      (clone as HTMLElement).style.minWidth = '1000px';
+
+      // Append to body so html2canvas can render it
+      document.body.appendChild(clone);
+
+      try {
+        // Add a small delay to ensure fonts and layout are fully stable
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        // Generate High-Quality Image using html-to-image
+        // Using PNG for better text clarity and to avoid JPEG artifacts
+        const imgData = await toPng(clone, {
+          quality: 1.0,
+          width: 1000,
+          pixelRatio: 2,
+          backgroundColor: '#ffffff',
+          cacheBust: true,
+          style: {
+            width: '1000px',
+            background: 'white',
+            margin: '0',
+          },
+        });
+
+        const cleanBase64 = imgData.split(',')[1];
+
+        // Upload to backend
+        const response = await axios.post('/api/invoice/share-link', {
+          invoiceId: id,
+          fileBase64: cleanBase64,
+          fileType: 'png',
+          invoiceNumber: data.invoiceNumber,
+        });
+
+        if (response.data.success) {
+          const shareableLink = response.data.data.shareableLink;
+
+          const customerName = data.customerId?.name || 'Customer';
+          const invoiceNumber = data.invoiceNumber || 'N/A';
+          const totalAmount = data.dueAmount || data.totalAmount || 0;
+
+          const message = `Hello ${customerName},\n\nPlease find your invoice #${invoiceNumber} below:\n\nTotal Amount: ${currencyFormat(
+            totalAmount
+          )}\n\nView Invoice: ${shareableLink}\n\nThank you for your business!`;
+
+          const phoneNumber = data.customerId?.contactDetails?.phone;
+
+          const whatsappLink = generateWhatsAppLink(
+            message,
+            phoneNumber ? `91${phoneNumber}` : undefined
+          );
+
+          window.open(whatsappLink, '_blank');
+          toast.success('Opening WhatsApp...');
+        } else {
+          throw new Error(response.data.message || 'Failed to share invoice');
+        }
+      } finally {
+        document.body.removeChild(clone);
+      }
+    } catch (error: any) {
+      logger(error, 'Error sharing invoice:');
+    } finally {
+      setIsSharing(false);
+    }
+  };
 
   if (!data && !isLoading) {
     return (
@@ -54,16 +154,29 @@ const InvoiceTemplate: React.FC = () => {
           </Button>
           <Button
             onClick={() => handlePrintInvoice()}
-            className='xs:w-auto w-full sm:ml-auto'
+            variant='outline'
+            className='xs:w-auto w-full'
           >
             <Printer className='mr-2 h-4 w-4' />
             Print Invoice
           </Button>
+          <Button
+            onClick={handleShareViaWhatsApp}
+            disabled={isSharing}
+            className='xs:w-auto w-full bg-green-600 hover:bg-green-700 sm:ml-auto'
+          >
+            <MessageCircle className='mr-2 h-4 w-4' />
+            {isSharing ? 'Sharing...' : 'Share via WhatsApp'}
+          </Button>
         </div>
       </div>
 
-      <Card className='mx-auto w-full max-w-4xl bg-white' ref={printContentRef}>
-        <CardContent className='p-4 sm:p-6'>
+      <Card
+        className='mx-auto w-full max-w-4xl bg-white'
+        ref={printContentRef}
+        style={{ minWidth: 900, width: 900 }}
+      >
+        <CardContent className='p-4 font-sans text-gray-900 sm:p-6'>
           {/* Header Section */}
           <header className='mb-4 flex flex-col items-center justify-center sm:mb-6'>
             <h6 className='font-bold underline'>ESTIMATE</h6>
@@ -133,22 +246,22 @@ const InvoiceTemplate: React.FC = () => {
           {/* Invoice Items Table */}
           <section>
             <div className='-mx-4 overflow-x-auto sm:mx-0'>
-              <table className='w-full min-w-[640px] border border-gray-300 [&>tr]:last:border-b-0'>
+              <table className='w-full min-w-[640px] table-fixed border border-gray-300 text-xs sm:text-sm [&>tr]:last:border-b-0'>
                 <thead className='border-b'>
                   <tr className='bg-gray-50'>
-                    <th className='w-16 border-r border-gray-300 px-2 py-2 text-center text-xs sm:w-20 sm:px-4 sm:text-sm'>
+                    <th className='w-16 border-r border-gray-300 px-2 py-2 text-center sm:w-20 sm:px-4'>
                       Sl. No
                     </th>
-                    <th className='font-sm border-r border-gray-300 px-2 py-2 text-center text-xs sm:px-4 sm:text-sm'>
+                    <th className='border-r border-gray-300 px-2 py-2 text-left sm:px-4'>
                       PARTICULARS
                     </th>
-                    <th className='w-16 border-r border-gray-300 px-2 py-2 text-center text-xs sm:w-24 sm:px-4 sm:text-sm'>
+                    <th className='w-16 border-r border-gray-300 px-2 py-2 text-center sm:w-24 sm:px-4'>
                       Qty.
                     </th>
-                    <th className='w-24 border-r border-gray-300 px-2 py-2 text-center text-xs sm:w-32 sm:px-4 sm:text-sm'>
+                    <th className='w-24 border-r border-gray-300 px-2 py-2 text-right sm:w-32 sm:px-4'>
                       Rate
                     </th>
-                    <th className='w-24 px-2 py-2 text-center text-xs sm:w-36 sm:px-4 sm:text-sm'>
+                    <th className='w-24 px-2 py-2 text-right sm:w-36 sm:px-4'>
                       AMOUNT
                     </th>
                   </tr>
@@ -156,25 +269,25 @@ const InvoiceTemplate: React.FC = () => {
                 <tbody>
                   {data?.items.map((item, index) => (
                     <tr key={index} className='border-gray-300'>
-                      <td className='border-r border-gray-300 px-2 py-2 text-center text-sm sm:px-4'>
+                      <td className='border-r border-gray-300 px-2 py-2 text-center sm:px-4'>
                         {index + 1}
                       </td>
-                      <td className='border-r border-gray-300 px-2 py-2 text-sm sm:px-4'>
+                      <td className='border-r border-gray-300 px-2 py-2 sm:px-4'>
                         {item.name}
                       </td>
-                      <td className='border-r border-gray-300 px-2 py-2 text-center text-sm sm:px-4'>
+                      <td className='border-r border-gray-300 px-2 py-2 text-center sm:px-4'>
                         {item.isCustomService && item.quantity === 0 ? (
                           <></>
                         ) : (
                           item.quantity
                         )}
                       </td>
-                      <td className='border-r border-gray-300 px-2 py-2 text-right text-sm sm:px-4'>
+                      <td className='border-r border-gray-300 px-2 py-2 text-right sm:px-4'>
                         {item.sellingPrice
                           ? currencyFormat(item.sellingPrice)
                           : '---'}
                       </td>
-                      <td className='px-2 py-2 text-right text-sm sm:px-4'>
+                      <td className='px-2 py-2 text-right sm:px-4'>
                         {item.amount ? currencyFormat(item.amount) : '---'}
                       </td>
                     </tr>
