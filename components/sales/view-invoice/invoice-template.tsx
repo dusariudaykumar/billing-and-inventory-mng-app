@@ -7,7 +7,7 @@ import { generateWhatsAppLink } from '@/helpers/whatsapp-share';
 import { useGetInvoiceQuery } from '@/store/services/sales';
 import axios from 'axios';
 import { toPng } from 'html-to-image';
-import { ArrowLeft, MessageCircle, Minus, Printer } from 'lucide-react';
+import { ArrowLeft, MessageCircle, Printer } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import React, { useRef, useState } from 'react';
@@ -44,24 +44,34 @@ const InvoiceTemplate: React.FC = () => {
       const originalElement = printContentRef.current;
       const clone = originalElement.cloneNode(true) as HTMLElement;
 
-      // Set fixed dimensions and styles for the clone to ensure perfect PDF rendering
+      // Create a container for the clone that is off-screen but "visible" to the browser rendering engine
+      const container = document.createElement('div');
+      container.style.position = 'fixed';
+      container.style.left = '-2000px';
+      container.style.top = '0';
+      container.style.width = '1000px';
+      container.style.height = 'auto';
+      container.style.overflow = 'visible'; // Important!
+      container.style.zIndex = '-1000';
+      document.body.appendChild(container);
+
+      // Set styles for the clone
       clone.style.width = '1000px';
       clone.style.minWidth = '1000px';
-      clone.style.position = 'absolute';
-      clone.style.left = '0'; // Move into viewport but hide with z-index
+      clone.style.position = 'absolute'; // Relative to container
+      clone.style.left = '0';
       clone.style.top = '0';
-      clone.style.zIndex = '-1000';
       clone.style.backgroundColor = '#ffffff';
+      clone.setAttribute('data-print', 'true');
+
+      // Append clone to container instead of body
+      container.appendChild(clone);
 
       // FORCE DESKTOP LAYOUT (Clean Snapshot Method)
       // We rely on html2canvas windowWidth: 1200 to enforce the desktop media queries.
       // No manual style overrides are applied to ensure "What You See Is What You Get".
 
-      (clone as HTMLElement).style.width = '1000px';
-      (clone as HTMLElement).style.minWidth = '1000px';
-
       // Append to body so html2canvas can render it
-      document.body.appendChild(clone);
 
       try {
         // Add a small delay to ensure fonts and layout are fully stable
@@ -116,7 +126,7 @@ const InvoiceTemplate: React.FC = () => {
           throw new Error(response.data.message || 'Failed to share invoice');
         }
       } finally {
-        document.body.removeChild(clone);
+        document.body.removeChild(container);
       }
     } catch (error: any) {
       logger(error, 'Error sharing invoice:');
@@ -172,9 +182,8 @@ const InvoiceTemplate: React.FC = () => {
       </div>
 
       <Card
-        className='mx-auto w-full max-w-4xl bg-white'
+        className='group mx-auto w-full max-w-4xl bg-white group-data-[print=true]:w-[1000px] group-data-[print=true]:min-w-[1000px]'
         ref={printContentRef}
-        style={{ minWidth: 900, width: 900 }}
       >
         <CardContent className='p-4 font-sans text-gray-900 sm:p-6'>
           {/* Header Section */}
@@ -202,7 +211,7 @@ const InvoiceTemplate: React.FC = () => {
 
           {/* Invoice Details Section */}
           <section className='mb-6 space-y-3 sm:mb-8 sm:space-y-4'>
-            <div className='flex flex-col justify-between gap-2 sm:flex-row sm:items-center sm:gap-0'>
+            <div className='flex flex-col justify-between gap-2 group-data-[print=true]:!flex-row group-data-[print=true]:!items-center group-data-[print=true]:!gap-0 sm:flex-row sm:items-center sm:gap-0'>
               <div className='flex items-center'>
                 <span className='pr-2'>No.</span>
                 <span className='text-sm font-semibold text-blue-600'>
@@ -227,7 +236,7 @@ const InvoiceTemplate: React.FC = () => {
                 {data?.customerId.name || '---'}
               </span>
             </div>
-            <div className='flex flex-col justify-between gap-2 sm:flex-row sm:gap-0'>
+            <div className='flex flex-col justify-between gap-2 group-data-[print=true]:!flex-row group-data-[print=true]:!gap-0 sm:flex-row sm:gap-0'>
               <div className='flex flex-1'>
                 <span className='whitespace-nowrap pr-2'>Vehicle No.</span>
                 <span className='flex-1 truncate border-b border-gray-300'>
@@ -246,22 +255,22 @@ const InvoiceTemplate: React.FC = () => {
           {/* Invoice Items Table */}
           <section>
             <div className='-mx-4 overflow-x-auto sm:mx-0'>
-              <table className='w-full min-w-[640px] table-fixed border border-gray-300 text-xs sm:text-sm [&>tr]:last:border-b-0'>
+              <table className='w-full min-w-[640px] table-fixed border border-gray-300 text-xs group-data-[print=true]:!text-sm sm:text-sm [&>tr]:last:border-b-0'>
                 <thead className='border-b'>
                   <tr className='bg-gray-50'>
-                    <th className='w-16 border-r border-gray-300 px-2 py-2 text-center sm:w-20 sm:px-4'>
+                    <th className='w-16 border-r border-gray-300 px-2 py-2 text-center group-data-[print=true]:!w-20 group-data-[print=true]:!px-4 sm:w-20 sm:px-4'>
                       Sl. No
                     </th>
-                    <th className='border-r border-gray-300 px-2 py-2 text-left sm:px-4'>
+                    <th className='border-r border-gray-300 px-2 py-2 text-left group-data-[print=true]:!px-4 sm:px-4'>
                       PARTICULARS
                     </th>
-                    <th className='w-16 border-r border-gray-300 px-2 py-2 text-center sm:w-24 sm:px-4'>
+                    <th className='w-16 border-r border-gray-300 px-2 py-2 text-center group-data-[print=true]:!w-24 group-data-[print=true]:!px-4 sm:w-24 sm:px-4'>
                       Qty.
                     </th>
-                    <th className='w-24 border-r border-gray-300 px-2 py-2 text-right sm:w-32 sm:px-4'>
+                    <th className='w-24 border-r border-gray-300 px-2 py-2 text-right group-data-[print=true]:!w-32 group-data-[print=true]:!px-4 sm:w-32 sm:px-4'>
                       Rate
                     </th>
-                    <th className='w-24 px-2 py-2 text-right sm:w-36 sm:px-4'>
+                    <th className='w-24 px-2 py-2 text-right group-data-[print=true]:!w-36 group-data-[print=true]:!px-4 sm:w-36 sm:px-4'>
                       AMOUNT
                     </th>
                   </tr>
@@ -269,25 +278,25 @@ const InvoiceTemplate: React.FC = () => {
                 <tbody>
                   {data?.items.map((item, index) => (
                     <tr key={index} className='border-gray-300'>
-                      <td className='border-r border-gray-300 px-2 py-2 text-center sm:px-4'>
+                      <td className='border-r border-gray-300 px-2 py-2 text-center group-data-[print=true]:!px-4 sm:px-4'>
                         {index + 1}
                       </td>
-                      <td className='border-r border-gray-300 px-2 py-2 sm:px-4'>
+                      <td className='border-r border-gray-300 px-2 py-2 group-data-[print=true]:!px-4 sm:px-4'>
                         {item.name}
                       </td>
-                      <td className='border-r border-gray-300 px-2 py-2 text-center sm:px-4'>
+                      <td className='border-r border-gray-300 px-2 py-2 text-center group-data-[print=true]:!px-4 sm:px-4'>
                         {item.isCustomService && item.quantity === 0 ? (
                           <></>
                         ) : (
                           item.quantity
                         )}
                       </td>
-                      <td className='border-r border-gray-300 px-2 py-2 text-right sm:px-4'>
+                      <td className='border-r border-gray-300 px-2 py-2 text-right group-data-[print=true]:!px-4 sm:px-4'>
                         {item.sellingPrice
                           ? currencyFormat(item.sellingPrice)
                           : '---'}
                       </td>
-                      <td className='px-2 py-2 text-right sm:px-4'>
+                      <td className='px-2 py-2 text-right group-data-[print=true]:!px-4 sm:px-4'>
                         {item.amount ? currencyFormat(item.amount) : '---'}
                       </td>
                     </tr>
@@ -299,19 +308,21 @@ const InvoiceTemplate: React.FC = () => {
                         key={`empty-${index}`}
                         className='border-b border-gray-300'
                       >
-                        <td className='border-r border-gray-300 px-2 py-2 sm:px-4'>
+                        <td className='border-r border-gray-300 px-2 py-2 group-data-[print=true]:!px-4 sm:px-4'>
                           &nbsp;
                         </td>
-                        <td className='border-r border-gray-300 px-2 py-2 sm:px-4'>
+                        <td className='border-r border-gray-300 px-2 py-2 group-data-[print=true]:!px-4 sm:px-4'>
                           &nbsp;
                         </td>
-                        <td className='border-r border-gray-300 px-2 py-2 sm:px-4'>
+                        <td className='border-r border-gray-300 px-2 py-2 group-data-[print=true]:!px-4 sm:px-4'>
                           &nbsp;
                         </td>
-                        <td className='border-r border-gray-300 px-2 py-2 sm:px-4'>
+                        <td className='border-r border-gray-300 px-2 py-2 group-data-[print=true]:!px-4 sm:px-4'>
                           &nbsp;
                         </td>
-                        <td className='px-2 py-2 sm:px-4'>&nbsp;</td>
+                        <td className='px-2 py-2 group-data-[print=true]:!px-4 sm:px-4'>
+                          &nbsp;
+                        </td>
                       </tr>
                     )
                   )}
@@ -319,11 +330,11 @@ const InvoiceTemplate: React.FC = () => {
                   <tr className='border-t'>
                     <td
                       colSpan={4}
-                      className='border-r border-t border-gray-300 px-2 py-2 text-right text-xs font-bold sm:px-4 sm:text-sm'
+                      className='border-r border-t border-gray-300 px-2 py-2 text-right text-xs font-bold group-data-[print=true]:!px-4 group-data-[print=true]:!text-sm sm:px-4 sm:text-sm'
                     >
                       SUB TOTAL:
                     </td>
-                    <td className='px-2 py-2 text-right text-sm font-medium sm:px-4'>
+                    <td className='theme-text-invoice px-2 py-2 text-right text-xs font-medium group-data-[print=true]:!px-4 group-data-[print=true]:!text-sm sm:px-4 sm:text-sm'>
                       {data?.totalAmount && data?.discount
                         ? currencyFormat(data.discount + data.totalAmount)
                         : data?.totalAmount
@@ -336,13 +347,17 @@ const InvoiceTemplate: React.FC = () => {
                     <tr>
                       <td
                         colSpan={4}
-                        className='border-r border-gray-300 px-2 py-2 pt-0 text-right text-xs font-bold sm:px-4 sm:text-sm'
+                        className='border-r border-gray-300 px-2 py-2 pt-0 text-right text-xs font-bold group-data-[print=true]:!px-4 group-data-[print=true]:!text-sm sm:px-4 sm:text-sm'
                       >
                         DISCOUNT:
                       </td>
-                      <td className='flex items-center justify-end px-2 py-2 pt-0 text-right text-sm font-medium sm:px-4'>
-                        <Minus className='h-3 w-3 sm:h-4 sm:w-4' />{' '}
-                        {data.discount ? currencyFormat(data.discount) : '---'}
+                      <td className='justify-end px-2 py-2 pt-0 text-right text-xs font-medium group-data-[print=true]:!px-4 group-data-[print=true]:!text-sm sm:px-4 sm:text-sm'>
+                        <div className='flex items-center justify-end'>
+                          <span className='mr-1 text-xl font-bold'>-</span>
+                          {data.discount
+                            ? currencyFormat(data.discount)
+                            : '---'}
+                        </div>
                       </td>
                     </tr>
                   ) : (
@@ -352,13 +367,15 @@ const InvoiceTemplate: React.FC = () => {
                     <tr>
                       <td
                         colSpan={4}
-                        className='border-r border-gray-300 px-2 py-2 pt-0 text-right text-xs font-bold sm:px-4 sm:text-sm'
+                        className='border-r border-gray-300 px-2 py-2 pt-0 text-right text-xs font-bold group-data-[print=true]:!px-4 group-data-[print=true]:!text-sm sm:px-4 sm:text-sm'
                       ></td>
-                      <td className='flex items-center justify-end px-2 py-2 pt-0 text-right text-sm font-medium sm:px-4'>
-                        <Minus className='h-3 w-3 sm:h-4 sm:w-4' />{' '}
-                        {data.customerPaid
-                          ? currencyFormat(data.customerPaid)
-                          : '---'}
+                      <td className='justify-end px-2 py-2 pt-0 text-right text-xs font-medium group-data-[print=true]:!px-4 group-data-[print=true]:!text-sm sm:px-4 sm:text-sm'>
+                        <div className='flex items-center justify-end'>
+                          <span className='mr-1 text-xl font-bold'>-</span>
+                          {data.customerPaid
+                            ? currencyFormat(data.customerPaid)
+                            : '---'}
+                        </div>
                       </td>
                     </tr>
                   ) : (
@@ -368,11 +385,11 @@ const InvoiceTemplate: React.FC = () => {
                   <tr>
                     <td
                       colSpan={4}
-                      className='border-r border-gray-300 px-2 py-2 pt-0 text-right text-xs font-bold sm:px-4 sm:text-sm'
+                      className='border-r border-gray-300 px-2 py-2 pt-0 text-right text-xs font-bold group-data-[print=true]:!px-4 group-data-[print=true]:!text-sm sm:px-4 sm:text-sm'
                     >
                       TOTAL:
                     </td>
-                    <td className='px-2 py-2 pt-0 text-right text-sm font-medium sm:px-4 '>
+                    <td className='px-2 py-2 pt-0 text-right text-xs font-medium group-data-[print=true]:!px-4 group-data-[print=true]:!text-sm sm:px-4 sm:text-sm'>
                       {data?.dueAmount ? currencyFormat(data.dueAmount) : '---'}
                     </td>
                   </tr>
